@@ -2,6 +2,7 @@
  * BeraMap - Arquivo de entrada principal
  *
  * Exporta todos os módulos e a função factory para inicialização
+ * Também expõe como variável global window.BeraMap para uso sem módulos
  */
 
 import { BeraMap } from './core/BeraMap.js';
@@ -27,25 +28,25 @@ import {
  * @param {Object} options - Opções de configuração
  * @returns {BeraMap} Instância do BeraMap
  */
-export function init(containerId, options = {}) {
+function init(containerId, options = {}) {
   return new BeraMap(containerId, options);
 }
 
-// Exportar tudo para acesso direto
+// ===================================================================
+// EXPORTAR COMO MÓDULO ES6 (para import)
+// ===================================================================
+
 export {
-  // Core
+  init,
   BeraMap,
-  // Managers
   GeoManager,
   EventManager,
-  // Renderers
   BaseRenderer,
   PointRenderer,
   LineRenderer,
   PolygonRenderer,
   CircleRenderer,
   DrawingRenderer,
-  // Constants
   GEOMETRY_TYPES,
   EVENTS,
   DEFAULT_CONFIG,
@@ -53,7 +54,6 @@ export {
   VERSION
 };
 
-// Exportação padrão com função factory
 export default {
   init,
   version: VERSION,
@@ -75,3 +75,31 @@ export default {
     STYLE_PRESETS
   }
 };
+
+// ===================================================================
+// EXPORTAR COMO VARIÁVEL GLOBAL (para scripts normais)
+// ===================================================================
+
+if (typeof window !== 'undefined') {
+  window.BeraMap = {
+    init: init,
+    version: VERSION,
+    BeraMap: BeraMap,
+    GeoManager: GeoManager,
+    EventManager: EventManager,
+    Renderers: {
+      BaseRenderer: BaseRenderer,
+      PointRenderer: PointRenderer,
+      LineRenderer: LineRenderer,
+      PolygonRenderer: PolygonRenderer,
+      CircleRenderer: CircleRenderer,
+      DrawingRenderer: DrawingRenderer
+    },
+    Constants: {
+      GEOMETRY_TYPES: GEOMETRY_TYPES,
+      EVENTS: EVENTS,
+      DEFAULT_CONFIG: DEFAULT_CONFIG,
+      STYLE_PRESETS: STYLE_PRESETS
+    }
+  };
+}

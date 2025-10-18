@@ -8,6 +8,9 @@
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 
+  <!-- BeraMap CSS -->
+  <link rel="stylesheet" href="/dist/css/maps.min.css">
+
   <style>
       * {
           margin: 0;
@@ -320,45 +323,30 @@
       .toggle label {
           cursor: pointer;
           font-size: 12px;
-          color: #666;
+          color: #555;
           margin: 0;
-      }
-
-      .available-files {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
-      }
-
-      .file-btn {
-          padding: 10px !important;
-          margin: 0 !important;
-          font-size: 12px !important;
       }
   </style>
 </head>
 <body>
 <div class="container">
-  <!-- Mapa -->
   <div id="map"></div>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-header">
-      <h1>🗺️ BeraMap</h1>
-      <small style="color: #999;">Carregamento Dinâmico de Dados</small>
+      <h1>📍 BeraMap</h1>
     </div>
 
     <div class="sidebar-content">
       <!-- Arquivos Disponíveis -->
       <div class="section">
-        <div class="section-title">📁 Arquivos Disponíveis</div>
-        <div class="available-files" id="availableFiles"></div>
+        <div class="section-title">📂 Arquivos Disponíveis</div>
+        <div id="availableFiles"></div>
       </div>
 
       <!-- Dados Carregados -->
       <div class="section">
-        <div class="section-title">📊 Dados Carregados</div>
+        <div class="section-title">📦 Dados Carregados</div>
         <div class="data-list" id="loadedDataList">
           <div class="empty-state">Nenhum dado carregado</div>
         </div>
@@ -366,26 +354,26 @@
 
       <!-- Estatísticas -->
       <div class="section">
-        <div class="section-title">📈 Estatísticas</div>
+        <div class="section-title">📊 Estatísticas</div>
         <div class="stats">
           <div class="stat-item">
             <span class="stat-label">Total:</span>
             <span class="stat-value" id="statTotal">0</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Points:</span>
+            <span class="stat-label">Pontos:</span>
             <span class="stat-value" id="statPoints">0</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Lines:</span>
+            <span class="stat-label">Linhas:</span>
             <span class="stat-value" id="statLines">0</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Polygons:</span>
+            <span class="stat-label">Polígonos:</span>
             <span class="stat-value" id="statPolygons">0</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Drawings:</span>
+            <span class="stat-label">Desenhos:</span>
             <span class="stat-value" id="statDrawings">0</span>
           </div>
         </div>
@@ -394,20 +382,20 @@
       <!-- Ações -->
       <div class="section">
         <div class="section-title">⚙️ Ações</div>
-        <button class="btn btn-warning" id="fitBoundsBtn">
+        <button id="fitBoundsBtn" class="btn btn-primary">
           📍 Encaixar Limites
         </button>
-        <button class="btn btn-danger" id="clearAllBtn">
+        <button id="clearAllBtn" class="btn btn-danger">
           🗑️ Limpar Tudo
         </button>
       </div>
 
-      <!-- Opções -->
+      <!-- Configurações -->
       <div class="section">
-        <div class="section-title">🔧 Opções</div>
+        <div class="section-title">⚙️ Configurações</div>
         <div class="toggle">
           <input type="checkbox" id="debugToggle" checked>
-          <label for="debugToggle">Debug Mode</label>
+          <label for="debugToggle">Debug</label>
         </div>
         <div class="toggle">
           <input type="checkbox" id="autoFitToggle" checked>
@@ -430,10 +418,10 @@
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- BeraMap -->
-<script type="module">
-  import {init} from '/assets/js/maps.js';
+<!-- BeraMap - Bundle minificado em dist/ como variável global -->
+<script src="/dist/js/maps.min.js"></script>
 
+<script>
   // ===================================================================
   // CONFIGURAÇÃO
   // ===================================================================
@@ -464,9 +452,9 @@
   function log(message, type = 'info') {
     const logContainer = document.getElementById('logContainer');
     const entry = document.createElement('div');
-    entry.className = `log-entry ${type}`;
+    entry.className = 'log-entry ' + type;
     const time = new Date().toLocaleTimeString('pt-BR');
-    entry.textContent = `[${time}] ${message}`;
+    entry.textContent = '[' + time + '] ' + message;
     logContainer.appendChild(entry);
     logContainer.scrollTop = logContainer.scrollHeight;
 
@@ -475,7 +463,7 @@
     }
 
     if (state.debugMode) {
-      console.log(`[${type.toUpperCase()}]`, message);
+      console.log('[' + type.toUpperCase() + ']', message);
     }
   }
 
@@ -484,7 +472,8 @@
   // ===================================================================
 
   function initMap() {
-    state.beraMap = init('map', {
+    // Acessar a função init do bundle global BeraMap
+    state.beraMap = BeraMap.init('map', {
       center: [-8.7619, -63.9039], // Porto Velho
       zoom: 13
     });
@@ -492,22 +481,22 @@
     log('✅ BeraMap inicializado', 'success');
 
     // Registrar eventos
-    state.beraMap.on('bera:geometryAdded', (e, data) => {
-      log(`✅ ${data.count} geometria(s) adicionada(s)`, 'success');
+    state.beraMap.on('bera:geometryAdded', function(e, data) {
+      log('✅ ' + data.count + ' geometria(s) adicionada(s)', 'success');
       updateStats();
     });
 
-    state.beraMap.on('bera:geometryRemoved', (e, data) => {
-      log(`❌ ${data.count} geometria(s) removida(s)`, 'warning');
+    state.beraMap.on('bera:geometryRemoved', function(e, data) {
+      log('❌ ' + data.count + ' geometria(s) removida(s)', 'warning');
       updateStats();
     });
 
-    state.beraMap.on('bera:geometryClicked', (e, data) => {
+    state.beraMap.on('bera:geometryClicked', function(e, data) {
       const type = data.geometry.type;
-      log(`🖱️ ${type} clicado: ${data.uuid.slice(0, 8)}...`, 'info');
+      log('🖱️ ' + type + ' clicado: ' + data.uuid.slice(0, 8) + '...', 'info');
     });
 
-    state.beraMap.on('bera:cleared', () => {
+    state.beraMap.on('bera:cleared', function() {
       log('🗑️ Mapa limpo', 'warning');
       updateStats();
     });
@@ -517,7 +506,7 @@
   // CARREGAR ARQUIVO GEOJSON
   // ===================================================================
 
-  async function loadGeoJSON(filename) {
+  function loadGeoJSON(filename) {
     try {
       // Se já está carregado, remover
       if (state.loadedData[filename]) {
@@ -525,42 +514,47 @@
         return;
       }
 
-      log(`⏳ Carregando ${FILES[filename].label}...`, 'info');
+      log('⏳ Carregando ' + FILES[filename].label + '...', 'info');
 
-      const response = await fetch(`/data/${filename}`);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+      fetch('/data/' + filename)
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+          }
+          return response.json();
+        })
+        .then(function(geojson) {
+          // Validar GeoJSON
+          if (!geojson.features || !Array.isArray(geojson.features)) {
+            throw new Error('GeoJSON inválido');
+          }
 
-      const geojson = await response.json();
+          // Adicionar ao mapa
+          const uuids = state.beraMap.addGeometries(geojson);
 
-      // Validar GeoJSON
-      if (!geojson.features || !Array.isArray(geojson.features)) {
-        throw new Error('GeoJSON inválido');
-      }
+          // Salvar no estado
+          state.loadedData[filename] = {
+            uuids: uuids,
+            data: geojson,
+            loadedAt: new Date()
+          };
 
-      // Adicionar ao mapa
-      const uuids = state.beraMap.addGeometries(geojson);
+          log('✅ ' + filename + ' carregado (' + uuids.length + ' geometrias)', 'success');
 
-      // Salvar no estado
-      state.loadedData[filename] = {
-        uuids: uuids,
-        data: geojson,
-        loadedAt: new Date()
-      };
+          // Auto-encaixar se ativado
+          if (state.autoFit) {
+            state.beraMap.fitBounds();
+          }
 
-      log(`✅ ${filename} carregado (${uuids.length} geometrias)`, 'success');
-
-      // Auto-encaixar se ativado
-      if (state.autoFit) {
-        state.beraMap.fitBounds();
-      }
-
-      // Atualizar UI
-      updateLoadedDataList();
-      updateStats();
+          // Atualizar UI
+          updateLoadedDataList();
+          updateStats();
+        })
+        .catch(function(error) {
+          log('❌ Erro ao carregar ' + filename + ': ' + error.message, 'error');
+        });
     } catch (error) {
-      log(`❌ Erro ao carregar ${filename}: ${error.message}`, 'error');
+      log('❌ Erro ao carregar ' + filename + ': ' + error.message, 'error');
     }
   }
 
@@ -576,11 +570,11 @@
       state.beraMap.removeGeometries(data.uuids);
       delete state.loadedData[filename];
 
-      log(`❌ ${filename} descarregado`, 'warning');
+      log('❌ ' + filename + ' descarregado', 'warning');
       updateLoadedDataList();
       updateStats();
     } catch (error) {
-      log(`❌ Erro ao descarregar: ${error.message}`, 'error');
+      log('❌ Erro ao descarregar: ' + error.message, 'error');
     }
   }
 
@@ -597,56 +591,59 @@
       return;
     }
 
-    listContainer.innerHTML = loaded
-      .map(([filename, data]) => {
-        const geomTypes = {};
-        data.data.features.forEach(f => {
-          const type = f.geometry.type;
-          geomTypes[type] = (geomTypes[type] || 0) + 1;
-        });
+    let html = '';
+    for (let i = 0; i < loaded.length; i++) {
+      const filename = loaded[i][0];
+      const data = loaded[i][1];
+      const geomTypes = {};
 
-        const badges = Object.entries(geomTypes)
-          .map(([type, count]) => {
-            const badgeClass = `badge-${type.toLowerCase().replace('string', '')}`;
-            return `<span class="badge ${badgeClass}">${type}: ${count}</span>`;
-          })
-          .join(' ');
+      for (let j = 0; j < data.data.features.length; j++) {
+        const f = data.data.features[j];
+        const type = f.geometry.type;
+        geomTypes[type] = (geomTypes[type] || 0) + 1;
+      }
 
-        return `
-            <div class="data-item">
-              <div>
-                <div class="data-name">${FILES[filename].label}</div>
-                <div style="margin-top: 4px; font-size: 10px; color: #999;">
-                  ${badges}
-                </div>
-              </div>
-              <button class="btn-remove" onclick="window.app.unloadGeoJSON('${filename}')">
-                Remover
-              </button>
-            </div>
-          `;
-      })
-      .join('');
+      let badges = '';
+      const typeKeys = Object.keys(geomTypes);
+      for (let j = 0; j < typeKeys.length; j++) {
+        const type = typeKeys[j];
+        const count = geomTypes[type];
+        const badgeClass = 'badge-' + type.toLowerCase().replace('string', '');
+        badges += '<span class="badge ' + badgeClass + '">' + type + ': ' + count + '</span>';
+      }
+
+      html += '<div class="data-item">' +
+        '<div>' +
+        '<div class="data-name">' + FILES[filename].label + '</div>' +
+        '<div style="margin-top: 4px; font-size: 10px; color: #999;">' +
+        badges +
+        '</div>' +
+        '</div>' +
+        '<button class="btn-remove" onclick="window.app.unloadGeoJSON(\'' + filename + '\')">Remover</button>' +
+        '</div>';
+    }
+
+    listContainer.innerHTML = html;
   }
 
   function updateAvailableFiles() {
     const container = document.getElementById('availableFiles');
-    container.innerHTML = Object.entries(FILES)
-      .map(([filename, file]) => {
-        const isLoaded = !!state.loadedData[filename];
-        const btnClass = isLoaded ? 'btn-danger' : 'btn-primary';
-        const btnText = isLoaded ? '✅ Remover' : '⬇️ Carregar';
+    let html = '';
 
-        return `
-            <button
-              class="btn ${btnClass} file-btn"
-              onclick="window.app.loadGeoJSON('${filename}')"
-            >
-              ${file.icon} ${btnText}
-            </button>
-          `;
-      })
-      .join('');
+    const fileKeys = Object.keys(FILES);
+    for (let i = 0; i < fileKeys.length; i++) {
+      const filename = fileKeys[i];
+      const file = FILES[filename];
+      const isLoaded = !!state.loadedData[filename];
+      const btnClass = isLoaded ? 'btn-danger' : 'btn-primary';
+      const btnText = isLoaded ? '✅ Remover' : '⬇️ Carregar';
+
+      html += '<button class="btn ' + btnClass + ' file-btn" onclick="window.app.loadGeoJSON(\'' + filename + '\')"> ' +
+        file.icon + ' ' + btnText +
+        '</button>';
+    }
+
+    container.innerHTML = html;
   }
 
   function updateStats() {
@@ -662,7 +659,7 @@
   // EVENT LISTENERS
   // ===================================================================
 
-  document.getElementById('fitBoundsBtn').addEventListener('click', () => {
+  document.getElementById('fitBoundsBtn').addEventListener('click', function() {
     if (state.beraMap.getGeometriesCount() > 0) {
       state.beraMap.fitBounds();
       log('📍 Limites encaixados', 'info');
@@ -671,10 +668,10 @@
     }
   });
 
-  document.getElementById('clearAllBtn').addEventListener('click', () => {
+  document.getElementById('clearAllBtn').addEventListener('click', function() {
     if (confirm('Tem certeza que deseja limpar tudo?')) {
       state.beraMap.clearAll();
-      Object.keys(state.loadedData).forEach(filename => {
+      Object.keys(state.loadedData).forEach(function(filename) {
         delete state.loadedData[filename];
       });
       updateLoadedDataList();
@@ -682,17 +679,17 @@
     }
   });
 
-  document.getElementById('debugToggle').addEventListener('change', (e) => {
+  document.getElementById('debugToggle').addEventListener('change', function(e) {
     state.debugMode = e.target.checked;
     if (state.beraMap.getEventManager()) {
       state.beraMap.getEventManager().setDebug(state.debugMode);
     }
-    log(`🔧 Debug ${state.debugMode ? 'ativado' : 'desativado'}`, 'info');
+    log('🔧 Debug ' + (state.debugMode ? 'ativado' : 'desativado'), 'info');
   });
 
-  document.getElementById('autoFitToggle').addEventListener('change', (e) => {
+  document.getElementById('autoFitToggle').addEventListener('change', function(e) {
     state.autoFit = e.target.checked;
-    log(`📍 Auto-encaixar ${state.autoFit ? 'ativado' : 'desativado'}`, 'info');
+    log('📍 Auto-encaixar ' + (state.autoFit ? 'ativado' : 'desativado'), 'info');
   });
 
   // ===================================================================
@@ -700,9 +697,9 @@
   // ===================================================================
 
   window.app = {
-    loadGeoJSON,
-    unloadGeoJSON,
-    state
+    loadGeoJSON: loadGeoJSON,
+    unloadGeoJSON: unloadGeoJSON,
+    state: state
   };
 
   // ===================================================================
@@ -717,5 +714,6 @@
   log('🚀 Aplicação pronta', 'success');
   log('👇 Clique nos botões para carregar dados', 'info');
 </script>
+
 </body>
 </html>
