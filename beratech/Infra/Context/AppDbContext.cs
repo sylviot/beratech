@@ -17,17 +17,49 @@ public class AppDbContext : DbContext
         
         modelBuilder.Entity<Acao>(entity =>
         {
+            entity.ToTable("acoes");
+    
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Titulo).IsRequired().HasMaxLength(255);
-            entity.HasIndex(e => e.Descricao).IsUnique();
-            
-            entity.HasIndex(e => e.AcaoParcial).IsUnique();
-            
-            entity.Property(e => e.DataInicio).HasDefaultValueSql("NOW()");
-            entity.Property(e => e.DataFim).HasDefaultValueSql("NOW()");
-            
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("NOW()");
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("NOW()");
+    
+            entity.Property(e => e.Id)
+                .HasColumnName("id");
+    
+            entity.Property(e => e.Titulo)
+                .HasColumnName("titulo")
+                .IsRequired()
+                .HasMaxLength(200);
+    
+            entity.Property(e => e.Descricao)
+                .HasColumnName("descricao")
+                .IsRequired()
+                .HasColumnType("text");
+    
+            entity.Property(e => e.Coordenadas)
+                .HasColumnName("coordenadas")
+                .HasMaxLength(100);
+    
+            entity.Property(e => e.AcaoParcial)
+                .HasColumnName("acao_parcial")
+                .IsRequired()
+                .HasDefaultValue(false);
+    
+            entity.Property(e => e.DataInicio)
+                .HasColumnName("data_inicio")
+                .IsRequired();
+    
+            entity.Property(e => e.DataFim)
+                .HasColumnName("data_fim")
+                .IsRequired();
+    
+            entity.Property(e => e.CreatedAt)
+                .HasColumnName("created_at")
+                .IsRequired()
+                .HasDefaultValueSql("NOW()");
+    
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnName("updated_at")
+                .IsRequired()
+                .HasDefaultValueSql("NOW()");
         });
     }
 }
