@@ -1,3 +1,6 @@
+using beratech.Infra.Context;
+using Microsoft.EntityFrameworkCore;
+
 namespace beratech
 {
     public class Program
@@ -5,6 +8,9 @@ namespace beratech
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Add services to the container.
 

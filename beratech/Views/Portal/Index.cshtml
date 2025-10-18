@@ -8,12 +8,22 @@
     <!-- Tailwind + DaisyUI CDN -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         :root {
           --color-yellow: #ffcc00;
           --color-green: #2ecc71;
           --color-blue: #3498db;
+        }
+        .loading {
+            pointer-events: none;
+            opacity: 0.6;
         }
     </style>
 </head>
@@ -28,146 +38,345 @@
 
     <main class="container mx-auto px-4 py-8">
 
-        <!-- Painel de CNPJ -->
-        <section class="mb-10">
-            <div class="card bg-yellow-100 border border-yellow-300 shadow-lg">
+        <!-- Seção Ações -->
+        <section>
+            <div class="card bg-base-100 border border-base-300 shadow-lg">
                 <div class="card-body">
-                    <h2 class="card-title text-yellow-800">Informações da Empresa</h2>
-                    <div id="cnpjSection" class="mt-4"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Painel: Propósitos -->
-        <section class="mb-10">
-            <div class="card bg-blue-50 border border-blue-200 shadow-md">
-                <div class="card-body">
-                    <h2 class="text-2xl font-bold text-blue-800 mb-4">Propósitos</h2>
-                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        <div class="card bg-white shadow-md">
-                            <figure><img src="https://source.unsplash.com/400x250/?goal,focus" alt="Propósitos" /></figure>
-                            <div class="card-body">
-                                <h3 class="card-title">Missão</h3>
-                                <p>Conheça nossos objetivos e valores.</p>
-                                <a href="#" class="btn btn-outline btn-info">Acessar</a>
-                            </div>
-                        </div>
-                        <div class="card bg-white shadow-md">
-                            <figure><img src="https://source.unsplash.com/400x250/?team,unity" alt="Equipe" /></figure>
-                            <div class="card-body">
-                                <h3 class="card-title">Equipe</h3>
-                                <p>Saiba quem faz parte da BeraTech.</p>
-                                <a href="#" class="btn btn-outline btn-info">Ver equipe</a>
-                            </div>
-                        </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="card-title text-blue-800">Ações</h2>
+                        <button id="btnNovaAcao" class="btn btn-primary">+ Nova Ação</button>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Painel: Inovação -->
-        <section class="mb-10">
-            <div class="card bg-green-50 border border-green-200 shadow-md">
-                <div class="card-body">
-                    <h2 class="text-2xl font-bold text-green-800 mb-4">Inovação</h2>
-                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        <div class="card bg-white shadow-md">
-                            <figure><img src="https://source.unsplash.com/400x250/?innovation,ai" alt="Tecnologia" /></figure>
-                            <div class="card-body">
-                                <h3 class="card-title">Tecnologia</h3>
-                                <p>Conheça nossos projetos de inovação.</p>
-                                <a href="#" class="btn btn-outline btn-success">Explorar</a>
-                            </div>
-                        </div>
-                        <div class="card bg-white shadow-md">
-                            <figure><img src="https://source.unsplash.com/400x250/?research,lab" alt="Pesquisa" /></figure>
-                            <div class="card-body">
-                                <h3 class="card-title">Pesquisa</h3>
-                                <p>Descubra as iniciativas de P&D.</p>
-                                <a href="#" class="btn btn-outline btn-success">Saiba mais</a>
-                            </div>
-                        </div>
+                    
+                    <div id="loadingSpinner" class="text-center py-8 hidden">
+                        <span class="loading loading-spinner loading-lg"></span>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Painel: Fomentação -->
-        <section class="mb-10">
-            <div class="card bg-yellow-50 border border-yellow-200 shadow-md">
-                <div class="card-body">
-                    <h2 class="text-2xl font-bold text-yellow-700 mb-4">Fomentação</h2>
-                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        <div class="card bg-white shadow-md">
-                            <figure><img src="https://source.unsplash.com/400x250/?funding,startup" alt="Investimentos" /></figure>
-                            <div class="card-body">
-                                <h3 class="card-title">Investimentos</h3>
-                                <p>Veja oportunidades de financiamento.</p>
-                                <a href="#" class="btn btn-outline btn-warning">Acessar</a>
-                            </div>
-                        </div>
-                        <div class="card bg-white shadow-md">
-                            <figure><img src="https://source.unsplash.com/400x250/?support,business" alt="Apoio" /></figure>
-                            <div class="card-body">
-                                <h3 class="card-title">Apoio</h3>
-                                <p>Conheça os programas de fomento disponíveis.</p>
-                                <a href="#" class="btn btn-outline btn-warning">Saiba mais</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Painel: Capacitação -->
-        <section class="mb-10">
-            <div class="card bg-blue-50 border border-blue-200 shadow-md">
-                <div class="card-body">
-                    <h2 class="text-2xl font-bold text-blue-800 mb-4">Capacitação</h2>
-                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        <div class="card bg-white shadow-md">
-                            <figure><img src="https://source.unsplash.com/400x250/?education,training" alt="Cursos" /></figure>
-                            <div class="card-body">
-                                <h3 class="card-title">Cursos</h3>
-                                <p>Participe dos nossos programas de capacitação.</p>
-                                <a href="#" class="btn btn-outline btn-info">Participar</a>
-                            </div>
-                        </div>
-                        <div class="card bg-white shadow-md">
-                            <figure><img src="https://source.unsplash.com/400x250/?learning,online" alt="Workshops" /></figure>
-                            <div class="card-body">
-                                <h3 class="card-title">Workshops</h3>
-                                <p>Eventos e treinamentos práticos.</p>
-                                <a href="#" class="btn btn-outline btn-info">Ver eventos</a>
-                            </div>
-                        </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra w-full">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Título</th>
+                                    <th>Descrição</th>
+                                    <th>Data Início</th>
+                                    <th>Data Fim</th>
+                                    <th>Parcial</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaAcoes">
+                                <!-- Preenchido via jQuery -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="footer footer-center bg-blue-600 text-white p-4">
-        <aside>
-            <p>© 2025 BeraTech — Todos os direitos reservados.</p>
-        </aside>
-    </footer>
+    <!-- Modal Criar/Editar Ação -->
+    <dialog id="modalAcao" class="modal">
+        <div class="modal-box w-11/12 max-w-2xl">
+            <h3 class="font-bold text-lg mb-4" id="modalTitle">Nova Ação</h3>
+            
+            <form id="formAcao">
+                <input type="hidden" id="acaoId" />
+                
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Título</span>
+                    </label>
+                    <input type="text" id="titulo" class="input input-bordered" required />
+                </div>
 
-    <!-- Script: controle de CNPJ -->
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Descrição</span>
+                    </label>
+                    <textarea id="descricao" class="textarea textarea-bordered" rows="3" required></textarea>
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Coordenadas</span>
+                    </label>
+                    <input type="text" id="coordenadas" class="input input-bordered" placeholder="-23.550520, -46.633308" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Data Início</span>
+                        </label>
+                        <input type="datetime-local" id="dataInicio" class="input input-bordered" required />
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Data Fim</span>
+                        </label>
+                        <input type="datetime-local" id="dataFim" class="input input-bordered" required />
+                    </div>
+                </div>
+
+                <div class="form-control mb-6">
+                    <label class="label cursor-pointer justify-start gap-2">
+                        <input type="checkbox" id="acaoParcial" class="checkbox checkbox-primary" />
+                        <span class="label-text">Ação Parcial</span>
+                    </label>
+                </div>
+
+                <div class="modal-action">
+                    <button type="button" class="btn" onclick="modalAcao.close()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnSalvar">Salvar</button>
+                </div>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <!-- Script -->
     <script>
-        const temCNPJ = false; // Troque para true para simular CNPJ cadastrado
-        const cnpjSection = document.getElementById('cnpjSection');
+        const API_URL = '/api/acoes';
 
-        if (temCNPJ) {
-          cnpjSection.innerHTML = `
-            <p class="text-lg text-yellow-800">CNPJ: <strong>12.345.678/0001-99</strong></p>
-          `;
-        } else {
-          cnpjSection.innerHTML = `
-            <p class="text-lg text-yellow-800 mb-4">Nenhum CNPJ cadastrado.</p>
-            <button class="btn btn-warning">Cadastrar CNPJ</button>
-          `;
+        // Configuração do SweetAlert2
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        // Funções auxiliares
+        function mostrarLoading(show) {
+            if (show) {
+                $('#loadingSpinner').removeClass('hidden');
+                $('#tabelaAcoes').addClass('loading');
+            } else {
+                $('#loadingSpinner').addClass('hidden');
+                $('#tabelaAcoes').removeClass('loading');
+            }
         }
+
+        function mostrarErro(mensagem, detalhes = null) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro!',
+                text: mensagem,
+                footer: detalhes ? `<small>${detalhes}</small>` : null,
+                confirmButtonColor: '#3b82f6'
+            });
+        }
+
+        function mostrarSucesso(mensagem) {
+            Toast.fire({
+                icon: 'success',
+                title: mensagem
+            });
+        }
+
+        function formatarData(dataStr) {
+            const data = new Date(dataStr);
+            return data.toLocaleString('pt-BR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatarDataParaInput(dataStr) {
+            const data = new Date(dataStr);
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.getDate()).padStart(2, '0');
+            const hora = String(data.getHours()).padStart(2, '0');
+            const minuto = String(data.getMinutes()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
+        }
+
+        function tratarErroAPI(xhr) {
+            let mensagem = 'Erro desconhecido';
+            let detalhes = null;
+
+            if (xhr.responseJSON) {
+                mensagem = xhr.responseJSON.message || mensagem;
+                detalhes = xhr.responseJSON.error || null;
+            } else if (xhr.responseText) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    mensagem = response.message || mensagem;
+                    detalhes = response.error || null;
+                } catch (e) {
+                    mensagem = xhr.responseText;
+                }
+            }
+
+            return { mensagem, detalhes };
+        }
+
+        // Carregar ações do backend
+        function carregarAcoes() {
+            mostrarLoading(true);
+            
+            $.ajax({
+                url: API_URL,
+                method: 'GET',
+                success: function(response) {
+                    const acoes = response;
+                    const tbody = $('#tabelaAcoes');
+                    tbody.empty();
+
+                    if (acoes.length === 0) {
+                        tbody.append('<tr><td colspan="7" class="text-center text-gray-500">Nenhuma ação cadastrada</td></tr>');
+                    } else {
+                        acoes.forEach(acao => {
+                            tbody.append(`
+                                <tr>
+                                    <td>${acao.id}</td>
+                                    <td>${acao.titulo}</td>
+                                    <td>${acao.descricao}</td>
+                                    <td>${formatarData(acao.dataInicio)}</td>
+                                    <td>${formatarData(acao.dataFim)}</td>
+                                    <td>
+                                        <span class="badge ${acao.acaoParcial ? 'badge-warning' : 'badge-success'}">
+                                            ${acao.acaoParcial ? 'Sim' : 'Não'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info mr-2" onclick="editarAcao(${acao.id})">Editar</button>
+                                        <button class="btn btn-sm btn-error" onclick="excluirAcao(${acao.id})">Excluir</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    const erro = tratarErroAPI(xhr);
+                    mostrarErro(erro.mensagem, erro.detalhes);
+                },
+                complete: function() {
+                    mostrarLoading(false);
+                }
+            });
+        }
+
+        function abrirModal(acao = null) {
+            if (acao) {
+                $('#modalTitle').text('Editar Ação');
+                $('#acaoId').val(acao.id);
+                $('#titulo').val(acao.titulo);
+                $('#descricao').val(acao.descricao);
+                $('#coordenadas').val(acao.coordenadas);
+                $('#dataInicio').val(formatarDataParaInput(acao.dataInicio));
+                $('#dataFim').val(formatarDataParaInput(acao.dataFim));
+                $('#acaoParcial').prop('checked', acao.acaoParcial);
+            } else {
+                $('#modalTitle').text('Nova Ação');
+                $('#formAcao')[0].reset();
+                $('#acaoId').val('');
+            }
+            modalAcao.showModal();
+        }
+
+        function editarAcao(id) {
+            $.ajax({
+                url: `${API_URL}/${id}`,
+                method: 'GET',
+                success: function(acao) {
+                    abrirModal(acao);
+                },
+                error: function(xhr) {
+                    const erro = tratarErroAPI(xhr);
+                    mostrarErro(erro.mensagem, erro.detalhes);
+                }
+            });
+        }
+
+        function excluirAcao(id) {
+            Swal.fire({
+                title: 'Tem certeza?',
+                text: "Esta ação não poderá ser revertida!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sim, excluir!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `${API_URL}/${id}`,
+                        method: 'DELETE',
+                        success: function() {
+                            mostrarSucesso('Ação excluída com sucesso!');
+                            carregarAcoes();
+                        },
+                        error: function(xhr) {
+                            const erro = tratarErroAPI(xhr);
+                            mostrarErro(erro.mensagem, erro.detalhes);
+                        }
+                    });
+                }
+            });
+        }
+
+        // Event Listeners
+        $('#btnNovaAcao').on('click', () => abrirModal());
+
+        $('#formAcao').on('submit', function(e) {
+            e.preventDefault();
+
+            const id = $('#acaoId').val();
+            const dados = {
+                titulo: $('#titulo').val(),
+                descricao: $('#descricao').val(),
+                coordenadas: $('#coordenadas').val(),
+                dataInicio: new Date($('#dataInicio').val()).toISOString(),
+                dataFim: new Date($('#dataFim').val()).toISOString(),
+                acaoParcial: $('#acaoParcial').is(':checked')
+            };
+
+            const isEdicao = id !== '';
+            if (isEdicao) {
+                dados.id = parseInt(id);
+            }
+
+            $('#btnSalvar').prop('disabled', true).addClass('loading');
+
+            $.ajax({
+                url: isEdicao ? `${API_URL}/${id}` : API_URL,
+                method: isEdicao ? 'PUT' : 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(dados),
+                success: function() {
+                    modalAcao.close();
+                    mostrarSucesso(isEdicao ? 'Ação atualizada com sucesso!' : 'Ação criada com sucesso!');
+                    carregarAcoes();
+                },
+                error: function(xhr) {
+                    const erro = tratarErroAPI(xhr);
+                    mostrarErro(erro.mensagem, erro.detalhes);
+                },
+                complete: function() {
+                    $('#btnSalvar').prop('disabled', false).removeClass('loading');
+                }
+            });
+        });
+
+        // Carregar ao iniciar
+        $(document).ready(() => {
+            carregarAcoes();
+        });
     </script>
 </body>
 </html>
