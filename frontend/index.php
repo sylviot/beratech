@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BeraMap - Exemplo de Uso</title>
+  <title>BeraMap - Carregamento Dinâmico de Dados</title>
 
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 
   <style>
       * {
@@ -23,122 +23,189 @@
       .container {
           display: flex;
           height: 100vh;
+          gap: 10px;
+          padding: 10px;
       }
 
       #map {
           flex: 1;
-          background: #e0e0e0;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       }
 
       .sidebar {
-          width: 350px;
+          width: 380px;
           background: white;
-          box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+      }
+
+      .sidebar-header {
+          padding: 20px;
+          border-bottom: 2px solid #3388ff;
+          background: #fafafa;
+      }
+
+      .sidebar-header h1 {
+          font-size: 22px;
+          color: #333;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+      }
+
+      .sidebar-content {
+          flex: 1;
           overflow-y: auto;
           padding: 20px;
-          border-right: 1px solid #ddd;
-      }
-
-      h1 {
-          font-size: 24px;
-          color: #333;
-          margin-bottom: 20px;
-          border-bottom: 2px solid #3388ff;
-          padding-bottom: 10px;
-      }
-
-      h2 {
-          font-size: 16px;
-          color: #555;
-          margin-top: 20px;
-          margin-bottom: 10px;
       }
 
       .section {
-          margin-bottom: 20px;
-          padding: 15px;
-          background: #f9f9f9;
-          border-radius: 5px;
-          border-left: 3px solid #3388ff;
+          margin-bottom: 25px;
       }
 
-      input, textarea, button {
-          width: 100%;
-          padding: 10px;
-          margin: 5px 0;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          font-family: inherit;
+      .section-title {
           font-size: 14px;
+          font-weight: 600;
+          color: #555;
+          margin-bottom: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
       }
 
-      button {
+      .btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+          padding: 12px 15px;
+          margin-bottom: 8px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          text-align: left;
+      }
+
+      .btn:active {
+          transform: scale(0.98);
+      }
+
+      .btn-primary {
           background: #3388ff;
           color: white;
+      }
+
+      .btn-primary:hover {
+          background: #2570d9;
+      }
+
+      .btn-success {
+          background: #28a745;
+          color: white;
+      }
+
+      .btn-success:hover {
+          background: #218838;
+      }
+
+      .btn-danger {
+          background: #dc3545;
+          color: white;
+      }
+
+      .btn-danger:hover {
+          background: #c82333;
+      }
+
+      .btn-warning {
+          background: #ffc107;
+          color: #333;
+      }
+
+      .btn-warning:hover {
+          background: #e0a800;
+      }
+
+      .btn-sm {
+          padding: 8px 12px;
+          font-size: 12px;
+          margin: 4px 0;
+      }
+
+      .data-list {
+          background: #f9f9f9;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          max-height: 200px;
+          overflow-y: auto;
+      }
+
+      .data-item {
+          padding: 12px;
+          border-bottom: 1px solid #eee;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 12px;
+      }
+
+      .data-item:last-child {
+          border-bottom: none;
+      }
+
+      .data-name {
+          flex: 1;
+          font-weight: 500;
+          color: #333;
+      }
+
+      .data-count {
+          background: #3388ff;
+          color: white;
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: 11px;
+          font-weight: 600;
+          margin-right: 8px;
+      }
+
+      .btn-remove {
+          background: #dc3545;
           border: none;
+          color: white;
+          padding: 4px 8px;
+          border-radius: 3px;
           cursor: pointer;
+          font-size: 11px;
           transition: background 0.3s;
       }
 
-      button:hover {
-          background: #256fd6;
+      .btn-remove:hover {
+          background: #c82333;
       }
 
-      button.danger {
-          background: #f44336;
+      .stats {
+          background: #f0f7ff;
+          border-left: 3px solid #3388ff;
+          padding: 12px;
+          border-radius: 4px;
+          font-size: 12px;
       }
 
-      button.danger:hover {
-          background: #d32f2f;
-      }
-
-      button.success {
-          background: #4caf50;
-      }
-
-      button.success:hover {
-          background: #388e3c;
-      }
-
-      .info-box {
-          background: #e3f2fd;
-          border-left: 4px solid #2196f3;
-          padding: 10px;
-          margin: 10px 0;
-          border-radius: 3px;
-          font-size: 13px;
-          color: #1565c0;
-      }
-
-      .error-box {
-          background: #ffebee;
-          border-left: 4px solid #f44336;
-          padding: 10px;
-          margin: 10px 0;
-          border-radius: 3px;
-          font-size: 13px;
-          color: #c62828;
-      }
-
-      .success-box {
-          background: #e8f5e9;
-          border-left: 4px solid #4caf50;
-          padding: 10px;
-          margin: 10px 0;
-          border-radius: 3px;
-          font-size: 13px;
-          color: #2e7d32;
-      }
-
-      .stat {
+      .stat-item {
           display: flex;
           justify-content: space-between;
-          padding: 8px 0;
-          border-bottom: 1px solid #eee;
-      }
-
-      .stat:last-child {
-          border-bottom: none;
+          padding: 4px 0;
       }
 
       .stat-label {
@@ -148,30 +215,125 @@
 
       .stat-value {
           color: #3388ff;
-          font-weight: bold;
+          font-weight: 600;
       }
 
-      #events-log {
-          background: #263238;
-          color: #aed581;
-          padding: 10px;
+      .log {
+          background: #1e1e1e;
+          color: #00ff00;
+          border: 1px solid #444;
           border-radius: 4px;
+          padding: 10px;
           font-family: 'Courier New', monospace;
-          font-size: 12px;
+          font-size: 11px;
           height: 150px;
           overflow-y: auto;
-          margin-top: 10px;
+          line-height: 1.4;
       }
 
       .log-entry {
-          margin: 2px 0;
           padding: 2px 0;
+          border-bottom: 1px solid #333;
       }
 
-      textarea {
-          min-height: 100px;
-          font-family: 'Courier New', monospace;
+      .log-entry.info {
+          color: #00ff00;
+      }
+
+      .log-entry.success {
+          color: #00ff00;
+      }
+
+      .log-entry.warning {
+          color: #ffff00;
+      }
+
+      .log-entry.error {
+          color: #ff0000;
+      }
+
+      .empty-state {
+          color: #999;
           font-size: 12px;
+          padding: 20px;
+          text-align: center;
+      }
+
+      .badge {
+          display: inline-block;
+          padding: 4px 8px;
+          border-radius: 3px;
+          font-size: 11px;
+          font-weight: 600;
+          color: white;
+      }
+
+      .badge-point {
+          background: #3388ff;
+      }
+
+      .badge-line {
+          background: #ff7800;
+      }
+
+      .badge-polygon {
+          background: #4caf50;
+      }
+
+      .badge-circle {
+          background: #9c27b0;
+      }
+
+      .badge-drawing {
+          background: #ff6b6b;
+      }
+
+      .loading {
+          display: inline-block;
+          width: 12px;
+          height: 12px;
+          border: 2px solid #3388ff;
+          border-top: 2px solid transparent;
+          border-radius: 50%;
+          animation: spin 0.6s linear infinite;
+      }
+
+      @keyframes spin {
+          to {
+              transform: rotate(360deg);
+          }
+      }
+
+      .toggle {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          margin-bottom: 10px;
+      }
+
+      .toggle input[type="checkbox"] {
+          cursor: pointer;
+          width: 16px;
+          height: 16px;
+      }
+
+      .toggle label {
+          cursor: pointer;
+          font-size: 12px;
+          color: #666;
+          margin: 0;
+      }
+
+      .available-files {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+      }
+
+      .file-btn {
+          padding: 10px !important;
+          margin: 0 !important;
+          font-size: 12px !important;
       }
   </style>
 </head>
@@ -182,68 +344,87 @@
 
   <!-- Sidebar -->
   <div class="sidebar">
-    <h1>🗺️ BeraMap</h1>
+    <div class="sidebar-header">
+      <h1>🗺️ BeraMap</h1>
+      <small style="color: #999;">Carregamento Dinâmico de Dados</small>
+    </div>
 
-    <!-- Status -->
-    <div class="section">
-      <h2>Status</h2>
-      <div class="stat">
-        <span class="stat-label">Inicializado:</span>
-        <span class="stat-value" id="status-initialized">❌</span>
+    <div class="sidebar-content">
+      <!-- Arquivos Disponíveis -->
+      <div class="section">
+        <div class="section-title">📁 Arquivos Disponíveis</div>
+        <div class="available-files" id="availableFiles"></div>
       </div>
-      <div class="stat">
-        <span class="stat-label">Versão:</span>
-        <span class="stat-value" id="status-version">-</span>
+
+      <!-- Dados Carregados -->
+      <div class="section">
+        <div class="section-title">📊 Dados Carregados</div>
+        <div class="data-list" id="loadedDataList">
+          <div class="empty-state">Nenhum dado carregado</div>
+        </div>
       </div>
-      <div class="stat">
-        <span class="stat-label">Total de Geometrias:</span>
-        <span class="stat-value" id="status-count">0</span>
+
+      <!-- Estatísticas -->
+      <div class="section">
+        <div class="section-title">📈 Estatísticas</div>
+        <div class="stats">
+          <div class="stat-item">
+            <span class="stat-label">Total:</span>
+            <span class="stat-value" id="statTotal">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Points:</span>
+            <span class="stat-value" id="statPoints">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Lines:</span>
+            <span class="stat-value" id="statLines">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Polygons:</span>
+            <span class="stat-value" id="statPolygons">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Drawings:</span>
+            <span class="stat-value" id="statDrawings">0</span>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Adicionar Ponto -->
-    <div class="section">
-      <h2>Adicionar Ponto</h2>
-      <input type="number" id="lat" placeholder="Latitude" value="-8.7619" step="0.0001">
-      <input type="number" id="lng" placeholder="Longitude" value="-63.9039" step="0.0001">
-      <input type="text" id="pointName" placeholder="Nome do ponto" value="Meu Ponto">
-      <button class="success" onclick="addPoint()">Adicionar Ponto</button>
-    </div>
+      <!-- Ações -->
+      <div class="section">
+        <div class="section-title">⚙️ Ações</div>
+        <button class="btn btn-warning" id="fitBoundsBtn">
+          📍 Encaixar Limites
+        </button>
+        <button class="btn btn-danger" id="clearAllBtn">
+          🗑️ Limpar Tudo
+        </button>
+      </div>
 
-    <!-- Adicionar Círculo -->
-    <div class="section">
-      <h2>Adicionar Círculo</h2>
-      <input type="number" id="circleLat" placeholder="Latitude" value="-8.7600" step="0.0001">
-      <input type="number" id="circleLng" placeholder="Longitude" value="-63.9000" step="0.0001">
-      <input type="number" id="radius" placeholder="Raio (metros)" value="500" step="100">
-      <button class="success" onclick="addCircle()">Adicionar Círculo</button>
-    </div>
+      <!-- Opções -->
+      <div class="section">
+        <div class="section-title">🔧 Opções</div>
+        <div class="toggle">
+          <input type="checkbox" id="debugToggle" checked>
+          <label for="debugToggle">Debug Mode</label>
+        </div>
+        <div class="toggle">
+          <input type="checkbox" id="autoFitToggle" checked>
+          <label for="autoFitToggle">Auto-encaixar</label>
+        </div>
+      </div>
 
-    <!-- Controles -->
-    <div class="section">
-      <h2>Controles</h2>
-      <button onclick="fitBounds()">📍 Encaixar ao Mapa</button>
-      <button class="danger" onclick="clearAll()">🗑️ Limpar Tudo</button>
-      <button onclick="exportData()">💾 Exportar GeoJSON</button>
-    </div>
-
-    <!-- Estatísticas -->
-    <div class="section">
-      <h2>Estatísticas</h2>
-      <button onclick="showStats()">📊 Ver Estatísticas</button>
-      <div id="stats-container"></div>
-    </div>
-
-    <!-- Log de Eventos -->
-    <div class="section">
-      <h2>Log de Eventos</h2>
-      <button onclick="clearLog()">🧹 Limpar Log</button>
-      <div id="events-log"></div>
+      <!-- Log -->
+      <div class="section">
+        <div class="section-title">📝 Log</div>
+        <div class="log" id="logContainer"></div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Leaflet JS -->
+<!-- Leaflet -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
 <!-- jQuery -->
@@ -251,149 +432,290 @@
 
 <!-- BeraMap -->
 <script type="module">
-  import { init } from './assets/js/maps.js';
+  import {init} from '/assets/js/maps.js';
 
-  // Variável global
-  window.beraMap = null;
+  // ===================================================================
+  // CONFIGURAÇÃO
+  // ===================================================================
 
-  // Inicializar mapa quando DOM estiver pronto
-  document.addEventListener('DOMContentLoaded', () => {
-    initializeBeraMap();
-  });
+  const FILES = {
+    'ponto.geojson': {label: '📍 Pontos', icon: '📍'},
+    'linha.geojson': {label: '📏 Linhas', icon: '📏'},
+    'poligonos.geojson': {label: '🔲 Polígonos', icon: '🔲'},
+    'desenho-fechado.geojson': {label: '✏️ Desenho Fechado', icon: '✏️'},
+    'desenho-sem-fechar.geojson': {label: '✏️ Desenho Aberto', icon: '✏️'}
+  };
 
-  function initializeBeraMap() {
-    // Criar instância
-    window.beraMap = init('map', {
-      center: [-8.7619, -63.9039],
+  // ===================================================================
+  // ESTADO GLOBAL
+  // ===================================================================
+
+  const state = {
+    beraMap: null,
+    loadedData: {}, // { filename: { uuids: [], data: geojson } }
+    debugMode: true,
+    autoFit: true
+  };
+
+  // ===================================================================
+  // LOGGING
+  // ===================================================================
+
+  function log(message, type = 'info') {
+    const logContainer = document.getElementById('logContainer');
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    const time = new Date().toLocaleTimeString('pt-BR');
+    entry.textContent = `[${time}] ${message}`;
+    logContainer.appendChild(entry);
+    logContainer.scrollTop = logContainer.scrollHeight;
+
+    if (logContainer.children.length > 50) {
+      logContainer.removeChild(logContainer.firstChild);
+    }
+
+    if (state.debugMode) {
+      console.log(`[${type.toUpperCase()}]`, message);
+    }
+  }
+
+  // ===================================================================
+  // INICIALIZAÇÃO DO MAPA
+  // ===================================================================
+
+  function initMap() {
+    state.beraMap = init('map', {
+      center: [-8.7619, -63.9039], // Porto Velho
       zoom: 13
     });
 
+    log('✅ BeraMap inicializado', 'success');
+
     // Registrar eventos
-    window.beraMap.on('bera:geometryAdded', (e, data) => {
-      logEvent(`✅ Geometrias adicionadas: ${data.count}`);
-      updateStatus();
+    state.beraMap.on('bera:geometryAdded', (e, data) => {
+      log(`✅ ${data.count} geometria(s) adicionada(s)`, 'success');
+      updateStats();
     });
 
-    window.beraMap.on('bera:geometryRemoved', (e, data) => {
-      logEvent(`❌ Geometrias removidas: ${data.count}`);
-      updateStatus();
+    state.beraMap.on('bera:geometryRemoved', (e, data) => {
+      log(`❌ ${data.count} geometria(s) removida(s)`, 'warning');
+      updateStats();
     });
 
-    window.beraMap.on('bera:geometryClicked', (e, data) => {
-      logEvent(`🖱️ Clique em: ${data.uuid.slice(0, 8)}...`);
+    state.beraMap.on('bera:geometryClicked', (e, data) => {
+      const type = data.geometry.type;
+      log(`🖱️ ${type} clicado: ${data.uuid.slice(0, 8)}...`, 'info');
     });
 
-    window.beraMap.on('bera:geometryHovered', (e, data) => {
-      logEvent(`👆 Hover em: ${data.uuid.slice(0, 8)}...`);
+    state.beraMap.on('bera:cleared', () => {
+      log('🗑️ Mapa limpo', 'warning');
+      updateStats();
     });
-
-    // Atualizar status inicial
-    updateStatus();
   }
 
-  window.addPoint = function() {
-    const lat = parseFloat(document.getElementById('lat').value);
-    const lng = parseFloat(document.getElementById('lng').value);
-    const name = document.getElementById('pointName').value;
+  // ===================================================================
+  // CARREGAR ARQUIVO GEOJSON
+  // ===================================================================
 
-    const geojson = {
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [lng, lat]
-      },
-      properties: { name: name }
-    };
+  async function loadGeoJSON(filename) {
+    try {
+      // Se já está carregado, remover
+      if (state.loadedData[filename]) {
+        unloadGeoJSON(filename);
+        return;
+      }
 
-    const uuids = window.beraMap.addGeometries(geojson);
-    logEvent(`✨ Ponto adicionado: ${uuids[0]?.slice(0, 8)}...`);
-  };
+      log(`⏳ Carregando ${FILES[filename].label}...`, 'info');
 
-  window.addCircle = function() {
-    const lat = parseFloat(document.getElementById('circleLat').value);
-    const lng = parseFloat(document.getElementById('circleLng').value);
-    const radius = parseFloat(document.getElementById('radius').value);
+      const response = await fetch(`/data/${filename}`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
 
-    const geojson = {
-      type: 'Feature',
-      geometry: {
-        type: 'Circle',
-        coordinates: [lng, lat],
-        properties: { radius: radius }
-      },
-      properties: { name: `Círculo ${radius}m` }
-    };
+      const geojson = await response.json();
 
-    const uuids = window.beraMap.addGeometries(geojson);
-    logEvent(`🔵 Círculo adicionado: ${uuids[0]?.slice(0, 8)}...`);
-  };
+      // Validar GeoJSON
+      if (!geojson.features || !Array.isArray(geojson.features)) {
+        throw new Error('GeoJSON inválido');
+      }
 
-  window.fitBounds = function() {
-    window.beraMap.fitBounds();
-    logEvent('📍 Encaixado ao mapa');
-  };
+      // Adicionar ao mapa
+      const uuids = state.beraMap.addGeometries(geojson);
 
-  window.clearAll = function() {
-    if (confirm('Tem certeza que deseja limpar todas as geometrias?')) {
-      window.beraMap.clearAll();
-      logEvent('🗑️ Todas as geometrias foram removidas');
+      // Salvar no estado
+      state.loadedData[filename] = {
+        uuids: uuids,
+        data: geojson,
+        loadedAt: new Date()
+      };
+
+      log(`✅ ${filename} carregado (${uuids.length} geometrias)`, 'success');
+
+      // Auto-encaixar se ativado
+      if (state.autoFit) {
+        state.beraMap.fitBounds();
+      }
+
+      // Atualizar UI
+      updateLoadedDataList();
+      updateStats();
+    } catch (error) {
+      log(`❌ Erro ao carregar ${filename}: ${error.message}`, 'error');
     }
-  };
+  }
 
-  window.exportData = function() {
-    const data = window.beraMap.exportGeoJSON();
-    console.log('Exportado:', data);
-    alert('GeoJSON exportado! Verifique o console');
-    logEvent('💾 GeoJSON exportado');
-  };
+  // ===================================================================
+  // DESCARREGAR ARQUIVO
+  // ===================================================================
 
-  window.showStats = function() {
-    const stats = window.beraMap.getStats();
-    const html = `
-        <div class="info-box">
-          <strong>Total:</strong> ${stats.totalCount}<br>
-          <strong>Points:</strong> ${stats.countByType.Point}<br>
-          <strong>Lines:</strong> ${stats.countByType.LineString}<br>
-          <strong>Polygons:</strong> ${stats.countByType.Polygon}<br>
-          <strong>Circles:</strong> ${stats.countByType.Circle}<br>
-          <strong>Drawings:</strong> ${stats.countByType.Drawing}
-        </div>
-      `;
-    document.getElementById('stats-container').innerHTML = html;
-    logEvent('📊 Estatísticas atualizadas');
-  };
+  function unloadGeoJSON(filename) {
+    try {
+      const data = state.loadedData[filename];
+      if (!data) return;
 
-  window.updateStatus = function() {
-    document.getElementById('status-initialized').textContent =
-      window.beraMap.isInitialized() ? '✅' : '❌';
-    document.getElementById('status-version').textContent =
-      window.beraMap.getVersion();
-    document.getElementById('status-count').textContent =
-      window.beraMap.getGeometriesCount();
-  };
+      state.beraMap.removeGeometries(data.uuids);
+      delete state.loadedData[filename];
 
-  window.logEvent = function(message) {
-    const log = document.getElementById('events-log');
-    const timestamp = new Date().toLocaleTimeString('pt-BR');
-    const entry = `<div class="log-entry">[${timestamp}] ${message}</div>`;
-    log.innerHTML = entry + log.innerHTML;
-
-    // Manter apenas os últimos 20 eventos
-    const entries = log.querySelectorAll('.log-entry');
-    if (entries.length > 20) {
-      entries[entries.length - 1].remove();
+      log(`❌ ${filename} descarregado`, 'warning');
+      updateLoadedDataList();
+      updateStats();
+    } catch (error) {
+      log(`❌ Erro ao descarregar: ${error.message}`, 'error');
     }
+  }
+
+  // ===================================================================
+  // ATUALIZAR UI
+  // ===================================================================
+
+  function updateLoadedDataList() {
+    const listContainer = document.getElementById('loadedDataList');
+    const loaded = Object.entries(state.loadedData);
+
+    if (loaded.length === 0) {
+      listContainer.innerHTML = '<div class="empty-state">Nenhum dado carregado</div>';
+      return;
+    }
+
+    listContainer.innerHTML = loaded
+      .map(([filename, data]) => {
+        const geomTypes = {};
+        data.data.features.forEach(f => {
+          const type = f.geometry.type;
+          geomTypes[type] = (geomTypes[type] || 0) + 1;
+        });
+
+        const badges = Object.entries(geomTypes)
+          .map(([type, count]) => {
+            const badgeClass = `badge-${type.toLowerCase().replace('string', '')}`;
+            return `<span class="badge ${badgeClass}">${type}: ${count}</span>`;
+          })
+          .join(' ');
+
+        return `
+            <div class="data-item">
+              <div>
+                <div class="data-name">${FILES[filename].label}</div>
+                <div style="margin-top: 4px; font-size: 10px; color: #999;">
+                  ${badges}
+                </div>
+              </div>
+              <button class="btn-remove" onclick="window.app.unloadGeoJSON('${filename}')">
+                Remover
+              </button>
+            </div>
+          `;
+      })
+      .join('');
+  }
+
+  function updateAvailableFiles() {
+    const container = document.getElementById('availableFiles');
+    container.innerHTML = Object.entries(FILES)
+      .map(([filename, file]) => {
+        const isLoaded = !!state.loadedData[filename];
+        const btnClass = isLoaded ? 'btn-danger' : 'btn-primary';
+        const btnText = isLoaded ? '✅ Remover' : '⬇️ Carregar';
+
+        return `
+            <button
+              class="btn ${btnClass} file-btn"
+              onclick="window.app.loadGeoJSON('${filename}')"
+            >
+              ${file.icon} ${btnText}
+            </button>
+          `;
+      })
+      .join('');
+  }
+
+  function updateStats() {
+    const stats = state.beraMap.getStats();
+    document.getElementById('statTotal').textContent = stats.totalCount;
+    document.getElementById('statPoints').textContent = stats.countByType.Point || 0;
+    document.getElementById('statLines').textContent = stats.countByType.LineString || 0;
+    document.getElementById('statPolygons').textContent = stats.countByType.Polygon || 0;
+    document.getElementById('statDrawings').textContent = stats.countByType.Drawing || 0;
+  }
+
+  // ===================================================================
+  // EVENT LISTENERS
+  // ===================================================================
+
+  document.getElementById('fitBoundsBtn').addEventListener('click', () => {
+    if (state.beraMap.getGeometriesCount() > 0) {
+      state.beraMap.fitBounds();
+      log('📍 Limites encaixados', 'info');
+    } else {
+      log('⚠️ Nenhuma geometria para encaixar', 'warning');
+    }
+  });
+
+  document.getElementById('clearAllBtn').addEventListener('click', () => {
+    if (confirm('Tem certeza que deseja limpar tudo?')) {
+      state.beraMap.clearAll();
+      Object.keys(state.loadedData).forEach(filename => {
+        delete state.loadedData[filename];
+      });
+      updateLoadedDataList();
+      updateAvailableFiles();
+    }
+  });
+
+  document.getElementById('debugToggle').addEventListener('change', (e) => {
+    state.debugMode = e.target.checked;
+    if (state.beraMap.getEventManager()) {
+      state.beraMap.getEventManager().setDebug(state.debugMode);
+    }
+    log(`🔧 Debug ${state.debugMode ? 'ativado' : 'desativado'}`, 'info');
+  });
+
+  document.getElementById('autoFitToggle').addEventListener('change', (e) => {
+    state.autoFit = e.target.checked;
+    log(`📍 Auto-encaixar ${state.autoFit ? 'ativado' : 'desativado'}`, 'info');
+  });
+
+  // ===================================================================
+  // EXPORTAR FUNÇÕES GLOBAIS
+  // ===================================================================
+
+  window.app = {
+    loadGeoJSON,
+    unloadGeoJSON,
+    state
   };
 
-  window.clearLog = function() {
-    document.getElementById('events-log').innerHTML = '';
-    logEvent('🧹 Log limpo');
-  };
+  // ===================================================================
+  // INICIALIZAÇÃO
+  // ===================================================================
 
-  // Log inicial
-  setTimeout(() => {
-    logEvent('🚀 BeraMap inicializado');
-  }, 500);
+  initMap();
+  updateAvailableFiles();
+  updateLoadedDataList();
+  updateStats();
+
+  log('🚀 Aplicação pronta', 'success');
+  log('👇 Clique nos botões para carregar dados', 'info');
 </script>
 </body>
 </html>
