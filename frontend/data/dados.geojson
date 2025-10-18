@@ -4,6 +4,21 @@
     {
       "type": "Feature",
       "properties": {
+        "name": "Círculo Envolvente",
+        "description": "Círculo que cobre toda a área com os marcadores",
+        "radius": 1055
+      },
+      "geometry": {
+        "type": "Circle",
+        "coordinates": [
+          -63.89386404761903,
+          -8.758388714285715
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "name": "Ponto 1",
         "source": "ponto.geojson"
       },
