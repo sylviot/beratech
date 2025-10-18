@@ -112,15 +112,6 @@
           background: #2570d9;
       }
 
-      .btn-success {
-          background: #28a745;
-          color: white;
-      }
-
-      .btn-success:hover {
-          background: #218838;
-      }
-
       .btn-danger {
           background: #dc3545;
           color: white;
@@ -130,27 +121,11 @@
           background: #c82333;
       }
 
-      .btn-warning {
-          background: #ffc107;
-          color: #333;
-      }
-
-      .btn-warning:hover {
-          background: #e0a800;
-      }
-
-      .btn-sm {
-          padding: 8px 12px;
-          font-size: 12px;
-          margin: 4px 0;
-      }
-
       .data-list {
           background: #f9f9f9;
           border: 1px solid #ddd;
           border-radius: 5px;
-          max-height: 200px;
-          overflow-y: auto;
+          padding: 12px;
       }
 
       .data-item {
@@ -170,16 +145,6 @@
           flex: 1;
           font-weight: 500;
           color: #333;
-      }
-
-      .data-count {
-          background: #3388ff;
-          color: white;
-          padding: 2px 8px;
-          border-radius: 12px;
-          font-size: 11px;
-          font-weight: 600;
-          margin-right: 8px;
       }
 
       .btn-remove {
@@ -269,42 +234,19 @@
           font-size: 11px;
           font-weight: 600;
           color: white;
+          margin-right: 4px;
       }
 
       .badge-point {
           background: #3388ff;
       }
 
-      .badge-line {
+      .badge-linestring {
           background: #ff7800;
       }
 
       .badge-polygon {
           background: #4caf50;
-      }
-
-      .badge-circle {
-          background: #9c27b0;
-      }
-
-      .badge-drawing {
-          background: #ff6b6b;
-      }
-
-      .loading {
-          display: inline-block;
-          width: 12px;
-          height: 12px;
-          border: 2px solid #3388ff;
-          border-top: 2px solid transparent;
-          border-radius: 50%;
-          animation: spin 0.6s linear infinite;
-      }
-
-      @keyframes spin {
-          to {
-              transform: rotate(360deg);
-          }
       }
 
       .toggle {
@@ -338,10 +280,12 @@
     </div>
 
     <div class="sidebar-content">
-      <!-- Arquivos Disponíveis -->
+      <!-- Dados -->
       <div class="section">
-        <div class="section-title">📂 Arquivos Disponíveis</div>
-        <div id="availableFiles"></div>
+        <div class="section-title">📂 Dados Geográficos</div>
+        <button id="loadDataBtn" class="btn btn-primary">
+          ⬇️ Carregar Dados
+        </button>
       </div>
 
       <!-- Dados Carregados -->
@@ -371,10 +315,6 @@
           <div class="stat-item">
             <span class="stat-label">Polígonos:</span>
             <span class="stat-value" id="statPolygons">0</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Desenhos:</span>
-            <span class="stat-value" id="statDrawings">0</span>
           </div>
         </div>
       </div>
@@ -418,29 +358,17 @@
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- BeraMap - Bundle minificado em dist/ como variável global -->
+<!-- BeraMap - Bundle minificado em dist/ -->
 <script src="/dist/js/maps.min.js"></script>
 
 <script>
-  // ===================================================================
-  // CONFIGURAÇÃO
-  // ===================================================================
-
-  const FILES = {
-    'ponto.geojson': {label: '📍 Pontos', icon: '📍'},
-    'linha.geojson': {label: '📏 Linhas', icon: '📏'},
-    'poligonos.geojson': {label: '🔲 Polígonos', icon: '🔲'},
-    'desenho-fechado.geojson': {label: '✏️ Desenho Fechado', icon: '✏️'},
-    'desenho-sem-fechar.geojson': {label: '✏️ Desenho Aberto', icon: '✏️'}
-  };
-
   // ===================================================================
   // ESTADO GLOBAL
   // ===================================================================
 
   const state = {
     beraMap: null,
-    loadedData: {}, // { filename: { uuids: [], data: geojson } }
+    loadedData: null,
     debugMode: true,
     autoFit: true
   };
@@ -449,7 +377,8 @@
   // LOGGING
   // ===================================================================
 
-  function log(message, type = 'info') {
+  function log(message, type) {
+    type = type || 'info';
     const logContainer = document.getElementById('logContainer');
     const entry = document.createElement('div');
     entry.className = 'log-entry ' + type;
@@ -472,15 +401,13 @@
   // ===================================================================
 
   function initMap() {
-    // Acessar a função init do bundle global BeraMap
     state.beraMap = BeraMap.init('map', {
-      center: [-8.7619, -63.9039], // Porto Velho
+      center: [-8.7619, -63.9039],
       zoom: 13
     });
 
     log('✅ BeraMap inicializado', 'success');
 
-    // Registrar eventos
     state.beraMap.on('bera:geometryAdded', function(e, data) {
       log('✅ ' + data.count + ' geometria(s) adicionada(s)', 'success');
       updateStats();
@@ -493,7 +420,7 @@
 
     state.beraMap.on('bera:geometryClicked', function(e, data) {
       const type = data.geometry.type;
-      log('🖱️ ' + type + ' clicado: ' + data.uuid.slice(0, 8) + '...', 'info');
+      log('🖱️ ' + type + ' clicado', 'info');
     });
 
     state.beraMap.on('bera:cleared', function() {
@@ -503,20 +430,19 @@
   }
 
   // ===================================================================
-  // CARREGAR ARQUIVO GEOJSON
+  // CARREGAR/DESCARREGAR DADOS
   // ===================================================================
 
-  function loadGeoJSON(filename) {
+  function loadData() {
     try {
-      // Se já está carregado, remover
-      if (state.loadedData[filename]) {
-        unloadGeoJSON(filename);
+      if (state.loadedData) {
+        unloadData();
         return;
       }
 
-      log('⏳ Carregando ' + FILES[filename].label + '...', 'info');
+      log('⏳ Carregando dados...', 'info');
 
-      fetch('/data/' + filename)
+      fetch('/data/dados.geojson')
         .then(function(response) {
           if (!response.ok) {
             throw new Error('HTTP ' + response.status);
@@ -524,53 +450,42 @@
           return response.json();
         })
         .then(function(geojson) {
-          // Validar GeoJSON
           if (!geojson.features || !Array.isArray(geojson.features)) {
             throw new Error('GeoJSON inválido');
           }
 
-          // Adicionar ao mapa
           const uuids = state.beraMap.addGeometries(geojson);
-
-          // Salvar no estado
-          state.loadedData[filename] = {
+          state.loadedData = {
             uuids: uuids,
             data: geojson,
             loadedAt: new Date()
           };
 
-          log('✅ ' + filename + ' carregado (' + uuids.length + ' geometrias)', 'success');
+          log('✅ Dados carregados (' + uuids.length + ' geometrias)', 'success');
 
-          // Auto-encaixar se ativado
           if (state.autoFit) {
             state.beraMap.fitBounds();
           }
 
-          // Atualizar UI
           updateLoadedDataList();
           updateStats();
         })
         .catch(function(error) {
-          log('❌ Erro ao carregar ' + filename + ': ' + error.message, 'error');
+          log('❌ Erro ao carregar: ' + error.message, 'error');
         });
     } catch (error) {
-      log('❌ Erro ao carregar ' + filename + ': ' + error.message, 'error');
+      log('❌ Erro: ' + error.message, 'error');
     }
   }
 
-  // ===================================================================
-  // DESCARREGAR ARQUIVO
-  // ===================================================================
-
-  function unloadGeoJSON(filename) {
+  function unloadData() {
     try {
-      const data = state.loadedData[filename];
-      if (!data) return;
+      if (!state.loadedData) return;
 
-      state.beraMap.removeGeometries(data.uuids);
-      delete state.loadedData[filename];
+      state.beraMap.removeGeometries(state.loadedData.uuids);
+      state.loadedData = null;
 
-      log('❌ ' + filename + ' descarregado', 'warning');
+      log('❌ Dados descarregados', 'warning');
       updateLoadedDataList();
       updateStats();
     } catch (error) {
@@ -584,66 +499,38 @@
 
   function updateLoadedDataList() {
     const listContainer = document.getElementById('loadedDataList');
-    const loaded = Object.entries(state.loadedData);
 
-    if (loaded.length === 0) {
+    if (!state.loadedData) {
       listContainer.innerHTML = '<div class="empty-state">Nenhum dado carregado</div>';
+      document.getElementById('loadDataBtn').textContent = '⬇️ Carregar Dados';
       return;
     }
 
-    let html = '';
-    for (let i = 0; i < loaded.length; i++) {
-      const filename = loaded[i][0];
-      const data = loaded[i][1];
-      const geomTypes = {};
-
-      for (let j = 0; j < data.data.features.length; j++) {
-        const f = data.data.features[j];
-        const type = f.geometry.type;
-        geomTypes[type] = (geomTypes[type] || 0) + 1;
-      }
-
-      let badges = '';
-      const typeKeys = Object.keys(geomTypes);
-      for (let j = 0; j < typeKeys.length; j++) {
-        const type = typeKeys[j];
-        const count = geomTypes[type];
-        const badgeClass = 'badge-' + type.toLowerCase().replace('string', '');
-        badges += '<span class="badge ' + badgeClass + '">' + type + ': ' + count + '</span>';
-      }
-
-      html += '<div class="data-item">' +
-        '<div>' +
-        '<div class="data-name">' + FILES[filename].label + '</div>' +
-        '<div style="margin-top: 4px; font-size: 10px; color: #999;">' +
-        badges +
-        '</div>' +
-        '</div>' +
-        '<button class="btn-remove" onclick="window.app.unloadGeoJSON(\'' + filename + '\')">Remover</button>' +
-        '</div>';
+    const geomTypes = {};
+    for (let i = 0; i < state.loadedData.data.features.length; i++) {
+      const f = state.loadedData.data.features[i];
+      const type = f.geometry.type;
+      geomTypes[type] = (geomTypes[type] || 0) + 1;
     }
 
-    listContainer.innerHTML = html;
-  }
-
-  function updateAvailableFiles() {
-    const container = document.getElementById('availableFiles');
-    let html = '';
-
-    const fileKeys = Object.keys(FILES);
-    for (let i = 0; i < fileKeys.length; i++) {
-      const filename = fileKeys[i];
-      const file = FILES[filename];
-      const isLoaded = !!state.loadedData[filename];
-      const btnClass = isLoaded ? 'btn-danger' : 'btn-primary';
-      const btnText = isLoaded ? '✅ Remover' : '⬇️ Carregar';
-
-      html += '<button class="btn ' + btnClass + ' file-btn" onclick="window.app.loadGeoJSON(\'' + filename + '\')"> ' +
-        file.icon + ' ' + btnText +
-        '</button>';
+    let badges = '';
+    const typeKeys = Object.keys(geomTypes);
+    for (let i = 0; i < typeKeys.length; i++) {
+      const type = typeKeys[i];
+      const count = geomTypes[type];
+      const badgeClass = 'badge-' + type.toLowerCase();
+      badges += '<span class="badge ' + badgeClass + '">' + type + ': ' + count + '</span>';
     }
 
-    container.innerHTML = html;
+    listContainer.innerHTML = '<div class="data-item">' +
+      '<div>' +
+      '<div class="data-name">dados.geojson</div>' +
+      '<div style="margin-top: 4px;">' + badges + '</div>' +
+      '</div>' +
+      '<button class="btn-remove" onclick="window.app.unloadData()">Remover</button>' +
+      '</div>';
+
+    document.getElementById('loadDataBtn').textContent = '✅ Remover Dados';
   }
 
   function updateStats() {
@@ -652,12 +539,13 @@
     document.getElementById('statPoints').textContent = stats.countByType.Point || 0;
     document.getElementById('statLines').textContent = stats.countByType.LineString || 0;
     document.getElementById('statPolygons').textContent = stats.countByType.Polygon || 0;
-    document.getElementById('statDrawings').textContent = stats.countByType.Drawing || 0;
   }
 
   // ===================================================================
   // EVENT LISTENERS
   // ===================================================================
+
+  document.getElementById('loadDataBtn').addEventListener('click', loadData);
 
   document.getElementById('fitBoundsBtn').addEventListener('click', function() {
     if (state.beraMap.getGeometriesCount() > 0) {
@@ -671,11 +559,8 @@
   document.getElementById('clearAllBtn').addEventListener('click', function() {
     if (confirm('Tem certeza que deseja limpar tudo?')) {
       state.beraMap.clearAll();
-      Object.keys(state.loadedData).forEach(function(filename) {
-        delete state.loadedData[filename];
-      });
+      state.loadedData = null;
       updateLoadedDataList();
-      updateAvailableFiles();
     }
   });
 
@@ -697,8 +582,8 @@
   // ===================================================================
 
   window.app = {
-    loadGeoJSON: loadGeoJSON,
-    unloadGeoJSON: unloadGeoJSON,
+    loadData: loadData,
+    unloadData: unloadData,
     state: state
   };
 
@@ -707,12 +592,11 @@
   // ===================================================================
 
   initMap();
-  updateAvailableFiles();
   updateLoadedDataList();
   updateStats();
 
   log('🚀 Aplicação pronta', 'success');
-  log('👇 Clique nos botões para carregar dados', 'info');
+  log('👇 Clique em Carregar Dados para importar geometrias', 'info');
 </script>
 
 </body>
