@@ -11,8 +11,8 @@ export class LineRenderer extends BaseRenderer {
     super(beraMap, 'LineString', {
       ...options,
       defaultStyle: {
-        color: options.defaultColor || '#ff7800',
-        weight: options.defaultWeight || 3,
+        color: options.defaultColor || '#d61ab8',
+        weight: options.defaultWeight || 5,
         opacity: options.defaultOpacity || 0.8,
         lineCap: options.lineCap || 'round',
         lineJoin: options.lineJoin || 'round'

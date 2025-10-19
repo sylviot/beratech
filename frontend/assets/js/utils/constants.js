@@ -50,8 +50,8 @@ export const STYLE_PRESETS = {
     fillOpacity: 0.8
   },
   LINE_STRING: {
-    color: '#ff7800',
-    weight: 3,
+    color: '#d61ab8',
+    weight: 5,
     opacity: 0.8
   },
   POLYGON: {
