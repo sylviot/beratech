@@ -1,0 +1,197 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Linha 1",
+        "responsavel": "João Silva",
+        "situacao": "Em Execução",
+        "dataInicio": "2025-10-17",
+        "dataFim": "2025-10-18"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ -63.895272, -8.747347 ],
+          [ -63.895546, -8.746149 ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Linha 2",
+        "responsavel": "Maria Santos",
+        "situacao": "Planejamento",
+        "dataInicio": "2025-10-17",
+        "dataFim": "2025-10-19"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ -63.891872, -8.747687 ],
+          [ -63.890278, -8.747378 ],
+          [ -63.890498, -8.746324 ],
+          [ -63.890777, -8.745115 ],
+          [ -63.892354, -8.74547 ],
+          [ -63.892102, -8.746644 ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Linha 3",
+        "responsavel": "Pedro Oliveira",
+        "situacao": "Concluído",
+        "dataInicio": "2025-10-17",
+        "dataFim": "2025-10-20"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ -63.892102, -8.746644 ],
+          [ -63.890498, -8.746324 ],
+          [ -63.889012, -8.745984 ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Polígono 1",
+        "responsavel": "Ana Costa",
+        "situacao": "Em Execução",
+        "dataInicio": "2025-10-18",
+        "dataFim": "2025-10-19"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [ -63.891141, -8.750961 ],
+            [ -63.890712, -8.753123 ],
+            [ -63.892265, -8.753512 ],
+            [ -63.893955, -8.753377 ],
+            [ -63.894328, -8.751674 ],
+            [ -63.891141, -8.750961 ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Polígono 2",
+        "responsavel": "João Silva",
+        "situacao": "Pausado",
+        "dataInicio": "2025-10-18",
+        "dataFim": "2025-10-20"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [ -63.894843, -8.749452 ],
+            [ -63.89163, -8.74879 ],
+            [ -63.892102, -8.746644 ],
+            [ -63.895272, -8.747347 ],
+            [ -63.895052, -8.748406 ],
+            [ -63.896645, -8.74873 ],
+            [ -63.896431, -8.749731 ],
+            [ -63.894843, -8.749452 ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Polígono 3",
+        "responsavel": "Maria Santos",
+        "situacao": "Concluído",
+        "dataInicio": "2025-10-19",
+        "dataFim": "2025-10-20"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [ -63.896796, -8.74768 ],
+            [ -63.897085, -8.746472 ],
+            [ -63.898475, -8.746785 ],
+            [ -63.898228, -8.747956 ],
+            [ -63.896796, -8.74768 ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Polígono 4",
+        "responsavel": "Pedro Oliveira",
+        "situacao": "Planejamento",
+        "dataInicio": "2025-10-17",
+        "dataFim": "2025-10-20"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [ -63.897429, -8.751257 ],
+            [ -63.896098, -8.750982 ],
+            [ -63.895905, -8.752063 ],
+            [ -63.89715, -8.752211 ],
+            [ -63.898265, -8.752465 ],
+            [ -63.898888, -8.750303 ],
+            [ -63.897729, -8.750049 ],
+            [ -63.897429, -8.751257 ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Polígono 5",
+        "responsavel": "Ana Costa",
+        "situacao": "Em Execução",
+        "dataInicio": "2025-10-18",
+        "dataFim": "2025-10-18"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [ -63.891463, -8.744601 ],
+            [ -63.896549, -8.745745 ],
+            [ -63.895497, -8.750261 ],
+            [ -63.890326, -8.749222 ],
+            [ -63.891463, -8.744601 ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Círculo Envolvente",
+        "description": "Círculo que cobre toda a área",
+        "responsavel": "João Silva",
+        "situacao": "Concluído",
+        "dataInicio": "2025-10-19",
+        "dataFim": "2025-10-20",
+        "radius": 400
+      },
+      "geometry": {
+        "type": "Circle",
+        "coordinates": [
+          -63.89422552631579,
+          -8.748706973684207
+        ]
+      }
+    }
+  ]
+}

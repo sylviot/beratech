@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>BeraTech | Informações</title>
+    <title>Syncronia | Informações</title>
 
     <!-- Tailwind + DaisyUI CDN -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
@@ -32,22 +32,50 @@
             opacity: 0.6;
         }
 
-        #mapContainer {
-            height: 500px;
-            width: 100%;
-            border-radius: 0.5rem;
-            border: 2px dashed #d1d5db;
-            background-color: #f9fafb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #9ca3af;
-            font-size: 1.125rem;
-        }
-
         .modal-box {
             overflow: visible !important;
         }
+    </style>
+
+    <!-- MAP -->
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="" />
+    <!-- Geoman (Leaflet.PM) CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@@geoman-io/leaflet-geoman-free@2.15.0/dist/leaflet-geoman.css" />
+    <style>
+        /* html, body { height: 100%; margin: 0; } */
+        #app {
+            width: 100%;
+            height: 685px !important;
+        }
+        /*       header { padding: .75rem 1rem; border-bottom: 1px solid #e5e7eb; background: #fff; position: sticky; top: 0; z-index: 1000; }
+              header h1 { margin: 0; font: 600 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+              header .actions { display: flex; gap: .5rem; margin-top: .5rem; flex-wrap: wrap; }
+              button { appearance: none; border: 1px solid #e5e7eb; background: #fff; padding: .5rem .75rem; border-radius: .75rem; cursor: pointer; }
+              button:hover { background: #f8fafc; } */
+        #map {
+            width: 100%;
+            height: 685px !important
+        }
+
+        .help-card {
+            position: absolute;
+            right: .75rem;
+            bottom: .75rem;
+            z-index: 1001;
+            background: rgba(255,255,255,.95);
+            border: 1px solid #e5e7eb;
+            border-radius: .75rem;
+            padding: .5rem .75rem;
+            max-width: 300px;
+            box-shadow: 0 4px 24px rgba(0,0,0,.08);
+        }
+
+            .help-card small {
+                color: #6b7280;
+            }
     </style>
 </head>
 <body class="bg-base-100 text-base-content">
@@ -56,7 +84,7 @@
 <div class="navbar bg-base-100 shadow-sm">
     <div class="flex container mx-auto">
         <div class="flex-1">
-            <h1 class="text-3xl font-bold my-2">Beratech</h1>
+            <h1 class="text-3xl font-bold my-2">Syncronia</h1>
         </div>
         <div class="flex gap-2">
             <div class="dropdown dropdown-end flex justify-center items-center">
@@ -128,20 +156,28 @@
         <div class="flex-1 overflow-hidden">
             <div class="grid grid-cols-1 lg:grid-cols-10 gap-0 h-full">
                 <!-- Mapa (70%) -->
-                <div class="lg:col-span-7 p-6 border-r border-base-300 overflow-auto">
-                    <div class="mb-3">
-                        <label class="label">
-                            <span class="label-text font-semibold">Selecione a localização no mapa</span>
-                            <span class="label-text-alt text-info" id="coordenadasDisplay">Clique no mapa</span>
-                        </label>
-                    </div>
-                    <div id="mapContainer">Espaço reservado para o mapa</div>
+                <div class="lg:col-span-7 px-2 border-r border-base-300 overflow-auto">
+                        <div id="app">
+                            <div>
+                                <div class="actions mb-1">
+                                    <button class="btn btn-xs" id="btn-locate" title="Centralizar na sua localização">📍 Minha localização</button>
+                                    <button class="btn btn-xs" id="btn-reset" title="Voltar para visão inicial">↺ Resetar visão</button>
+                                    <button class="btn btn-xs" id="btn-draw" title="Desenhar trechos (linhas) no mapa">✏️ Desenhar trechos</button>
+                                    <button class="btn btn-xs" id="btn-draw-point" title="Marcar um ponto específico">📌 Desenhar ponto</button>
+                                    <button class="btn btn-xs" id="btn-draw-polygon" title="Desenhar área (quadra)">▧ Desenhar área</button>
+                                    <button class="btn btn-xs" id="btn-export" title="Exportar tudo como GeoJSON">💾 Finalizar</button>
+                                    <button class="btn btn-xs" id="btn-clear" title="Remover todos os desenhos">🗑️ Limpar</button>
+                                </div>
+                            </div>
+                            <div id="map"></div>
+                        </div>
                 </div>
 
                 <!-- Formulário (30%) -->
                 <div class="lg:col-span-3 p-6 overflow-auto">
                     <form id="formAcao" class="space-y-4">
-                        <input type="hidden" id="acaoId"/>
+                            <input type="hidden" id="acaoId" />
+                            <input type="hidden" id="responsavel" value="Secretária XPTO" />
                         <input type="hidden" id="coordenadas"/>
 
                         <div class="form-control">
@@ -208,6 +244,176 @@
         <button>close</button>
     </form>
 </dialog>
+
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <!-- Geoman (Leaflet.PM) JS -->
+    <script src="https://unpkg.com/@@geoman-io/leaflet-geoman-free@2.15.0/dist/leaflet-geoman.min.js"></script>
+    <script>
+        // --- Configuração base ---
+        const inicial = { centro: [-8.76077, -63.8999], zoom: 13 };
+
+        // Camadas base
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contribs'
+        });
+        const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 19,
+          attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USGS, IGN, etc.'
+        });
+
+        // Mapa
+        const map = L.map('map', { center: inicial.centro, zoom: inicial.zoom, layers: [osm], zoomControl: true });
+
+        // Controle de camadas
+        const baseMaps = { 'OpenStreetMap': osm, 'Satélite (Esri)': esriSat };
+        const overlayMaps = {};
+        const layerControl = L.control.layers(baseMaps, overlayMaps, { collapsed: true }).addTo(map);
+
+        // Escala
+        L.control.scale({ metric: true, imperial: false }).addTo(map);
+
+        // Grupos
+        const trechosGroup = L.layerGroup().addTo(map);
+        const pontosGroup  = L.layerGroup().addTo(map);
+        const areasGroup   = L.layerGroup().addTo(map);
+        layerControl.addOverlay(trechosGroup, 'Trechos desenhados');
+        layerControl.addOverlay(pontosGroup,  'Pontos desenhados');
+        layerControl.addOverlay(areasGroup,   'Áreas desenhadas');
+
+        // Helpers
+        function comprimentoEmMetros(latlngs) {
+          if (!Array.isArray(latlngs)) return 0;
+          let d = 0; for (let i = 1; i < latlngs.length; i++) d += map.distance(latlngs[i-1], latlngs[i]);
+          return d;
+        }
+        function formatarMetros(m) { return m >= 1000 ? (m/1000).toFixed(2) + ' km' : Math.round(m) + ' m'; }
+
+        // Click -> coordenadas
+        map.on('click', (e) => {
+          const { lat, lng } = e.latlng;
+          L.popup().setLatLng([lat, lng]).setContent(`Coordenadas:<br><b>${lat.toFixed(6)}, ${lng.toFixed(6)}</b>`).openOn(map);
+        });
+
+        // Botões básicos
+        document.getElementById('btn-reset').addEventListener('click', () => map.setView(inicial.centro, inicial.zoom));
+        let userCircle = null, userMarker = null;
+        document.getElementById('btn-locate').addEventListener('click', () => {
+          if (!navigator.geolocation) return alert('Geolocalização não suportada.');
+          navigator.geolocation.getCurrentPosition((e) => {
+            const { latitude, longitude, accuracy } = e.coords; const pos = [latitude, longitude];
+            if (!userMarker) userMarker = L.marker(pos, { title: 'Você está aqui' }).addTo(map); else userMarker.setLatLng(pos);
+            if (!userCircle) userCircle = L.circle(pos, { radius: accuracy }).addTo(map); else { userCircle.setLatLng(pos); userCircle.setRadius(accuracy); }
+            userMarker.bindPopup('Sua localização aproximada'); map.setView(pos, 15);
+          }, (err) => alert('Não foi possível obter sua localização: ' + (err.message||err)), { enableHighAccuracy: true, timeout: 10000, maximumAge: 10000 });
+        });
+
+        // --- Geoman (Leaflet.PM) ---
+        const pmOK = !!(map.pm && typeof map.pm.addControls === 'function');
+        if (pmOK) {
+          // Estilo e snapping
+          map.pm.setPathOptions({ color: '#d97706', weight: 6, opacity: 0.9 }, { snappable: true, snapDistance: 30, snapSegment: true, snapVertex: true });
+          map.pm.addControls({
+            position: 'topleft',
+            drawMarker: true,
+            drawPolygon: true,
+            drawPolyline: true,
+            editMode: true,
+            removalMode: true,
+            dragMode: false,
+            cutPolygon: false,
+            drawCircle: false,
+            drawCircleMarker: false,
+            drawRectangle: false
+          });
+
+          // Registrar criações
+          map.on('pm:create', function (e) {
+            const layer = e.layer; if (!layer) return;
+            // Linha (Polyline)
+            if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
+              trechosGroup.addLayer(layer);
+              const latlngs = layer.getLatLngs();
+              const len = comprimentoEmMetros(latlngs);
+              // Fechamento inteligente: se último ponto colar no primeiro, vira área
+              if (latlngs.length > 2) {
+                const start = latlngs[0];
+                const end = latlngs[latlngs.length - 1];
+                const CLOSE_THRESH = 15; // metros
+                if (map.distance(start, end) <= CLOSE_THRESH) {
+                  const ring = latlngs.slice(0, -1); // remove o último (duplicado do primeiro)
+                  const poly = L.polygon(ring, { color: '#059669', weight: 3, fillOpacity: 0.25 });
+                  areasGroup.addLayer(poly); trechosGroup.removeLayer(layer);
+                  poly.bindPopup('<b>Área</b><br>Quadra desenhada');
+                  return;
+                }
+              }
+              layer.bindPopup('<b>Trecho</b><br>Comprimento: ' + formatarMetros(len));
+              return;
+            }
+            // Polígono
+            if (layer instanceof L.Polygon) {
+              areasGroup.addLayer(layer);
+              layer.bindPopup('<b>Área</b><br>Quadra desenhada');
+              return;
+            }
+            // Ponto
+            if (layer instanceof L.Marker || layer instanceof L.CircleMarker) {
+              pontosGroup.addLayer(layer);
+              const { lat, lng } = layer.getLatLng();
+              layer.bindPopup('<b>Ponto</b><br>LatLng: ' + lat.toFixed(6) + ', ' + lng.toFixed(6));
+              return;
+            }
+          });
+
+          // Botões custom
+          document.getElementById('btn-draw').addEventListener('click', function () {
+            map.pm.enableDraw('Line', {
+              snappable: true, snapVertex: true, snapSegment: true, snapDistance: 30,
+              finishOn: 'dblclick', // finalize com duplo clique
+              // requireSnapToFinish ajuda a fechar no vértice, quando for o caso
+              requireSnapToFinish: false
+            });
+          });
+          document.getElementById('btn-draw-point').addEventListener('click', function () {
+            map.pm.enableDraw('Marker', {});
+          });
+          document.getElementById('btn-draw-polygon').addEventListener('click', function () {
+            map.pm.enableDraw('Polygon', {
+              snappable: true, snapVertex: true, snapSegment: true, snapDistance: 30,
+              // Com snapping ativado, clicar no primeiro vértice fecha corretamente
+              requireSnapToFinish: true
+            });
+          });
+        } else {
+          // Fallback se Geoman não carregar
+          const warn = () => alert('Leaflet.Geoman não carregou. Desenho indisponível.');
+          ['btn-draw','btn-draw-point','btn-draw-polygon'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('click', warn); });
+        }
+
+        // Exportar GeoJSON (linhas + pontos + áreas)
+        document.getElementById('btn-export').addEventListener('click', function () {
+          const features = [];
+          trechosGroup.eachLayer(layer => { const gj = layer.toGeoJSON(); if (gj?.geometry?.type === 'LineString') features.push(gj); });
+          pontosGroup.eachLayer(layer => { const gj = layer.toGeoJSON(); if (gj?.geometry?.type === 'Point') features.push(gj); });
+          areasGroup.eachLayer(layer  => { const gj = layer.toGeoJSON(); if (gj?.geometry && (gj.geometry.type === 'Polygon' || gj.geometry.type === 'MultiPolygon')) features.push(gj); });
+          if (!features.length) { alert('Não há elementos para exportar.'); return; }
+          const fc = { type: 'FeatureCollection', features };
+          let coordenadas = document.getElementById('coordenadas')
+          coordenadas.value = JSON.stringify(features)
+          return console.warn(JSON.stringify(fc, null, 2));
+          // const blob = new Blob([JSON.stringify(fc, null, 2)], { type: 'application/json' });
+          // const url = URL.createObjectURL(blob);
+          // const a = document.createElement('a'); a.href = url; a.download = 'desenhos-porto-velho.geojson'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        });
+
+        // Limpar
+        document.getElementById('btn-clear').addEventListener('click', function(){ trechosGroup.clearLayers(); pontosGroup.clearLayers(); areasGroup.clearLayers(); });
+    </script>
 
 <!-- Script -->
 <script>
@@ -399,6 +605,7 @@
         if (acao) {
             $('#modalTitle').text('Editar Ação');
             $('#acaoId').val(acao.id);
+            $('#responsavel').val(acao.responsavel);
             $('#titulo').val(acao.titulo);
             $('#descricao').val(acao.descricao);
             $('#coordenadas').val(acao.coordenadas);
@@ -501,6 +708,7 @@
         const dados = {
             titulo: $('#titulo').val(),
             descricao: $('#descricao').val(),
+                responsavel: $('#responsavel').val(),
             coordenadas: $('#coordenadas').val(),
             dataInicio: dataInicioVal.toISOString(),
             dataFim: dataFimVal.toISOString(),

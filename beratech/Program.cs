@@ -1,4 +1,5 @@
 using beratech.Infra.Context;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 
 namespace beratech
@@ -15,6 +16,7 @@ namespace beratech
             // Add services to the container.
 
             builder.Services.AddControllersWithViews();
+            
 
             var app = builder.Build();
 
@@ -23,6 +25,14 @@ namespace beratech
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
+
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings[".geojson"] = "application/geo+json";
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ContentTypeProvider = provider
+            });
 
             app.MapControllerRoute(
                 name: "default",

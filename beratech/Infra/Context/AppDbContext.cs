@@ -28,7 +28,12 @@ public class AppDbContext : DbContext
                 .HasColumnName("titulo")
                 .IsRequired()
                 .HasMaxLength(200);
-    
+
+            entity.Property(e => e.Responsavel)
+                .HasColumnName("responsavel")
+                .IsRequired()
+                .HasMaxLength(400);
+
             entity.Property(e => e.Descricao)
                 .HasColumnName("descricao")
                 .IsRequired()

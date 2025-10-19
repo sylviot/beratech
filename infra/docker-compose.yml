@@ -1,0 +1,48 @@
+services:
+  web:
+    image: httpd:2.4
+    container_name: my-apache-app
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      # monta a pasta atual no diretório padrão do Apache
+      - ../linhas:/usr/local/apache2/htdocs:Z
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: postgis_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: geodb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data:z
+    networks:
+      - pgnetwork
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    volumes:
+      - pgadmindata:/var/lib/pgadmin:z
+    networks:
+      - pgnetwork
+
+networks:
+  pgnetwork:
+    driver: bridge
+
+volumes:
+  pgdata:
+  pgadmindata:
