@@ -20,16 +20,16 @@ public class AcoesController : ControllerBase
     }
 
     [HttpGet("filter")]
-    public async Task<IActionResult> Index([FromQuery]string responsavel = null, [FromQuery]DateTime? periodoInicio = null, [FromQuery]DateTime? periodoFim = null)
+    public async Task<IActionResult> Index([FromQuery] string responsavel = null, [FromQuery] DateTime? periodoInicio = null, [FromQuery] DateTime? periodoFim = null)
     {
         var query = _context.Set<Acao>().AsQueryable();
 
-        if(!string.IsNullOrEmpty(responsavel))
+        if (!string.IsNullOrEmpty(responsavel))
         {
             query = query.Where(x => x.Responsavel == responsavel);
         }
 
-        if(periodoInicio != null)
+        if (periodoInicio != null)
         {
             query = query.Where(x => x.CreatedAt > periodoInicio);
         }
@@ -47,6 +47,19 @@ public class AcoesController : ControllerBase
             try
             {
                 var feature = JsonSerializer.Deserialize<Feature[]>(item.Coordenadas);
+                foreach (var f in feature)
+                {
+                    f.properties = new Properties()
+                    {
+                        name = item.Titulo,
+                        responsavel = item.Responsavel,
+                        situacao = "Planejamento",
+                        dataInicio = item.DataInicio.ToString("yyyy-MM-dd"),
+                        dataFim = item.DataFim.ToString("yyyy-MM-dd"),
+                        description = item.Descricao
+                    };
+                }
+
                 featuresCollection.Features.AddRange(feature);
             }
             catch
