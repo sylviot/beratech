@@ -213,6 +213,8 @@
     areasGroup.eachLayer(layer  => { const gj = layer.toGeoJSON(); if (gj?.geometry && (gj.geometry.type === 'Polygon' || gj.geometry.type === 'MultiPolygon')) features.push(gj); });
     if (!features.length) { alert('Não há elementos para exportar.'); return; }
     const fc = { type: 'FeatureCollection', features };
+    return console.warn(JSON.stringify(fc, null, 2));
+
     const blob = new Blob([JSON.stringify(fc, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'desenhos-porto-velho.geojson'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);

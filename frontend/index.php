@@ -515,6 +515,7 @@
           return response.json();
         })
         .then(function(geojson) {
+          console.log(geojson)
           if (!geojson.features || !Array.isArray(geojson.features)) {
             throw new Error('GeoJSON inválido');
           }

@@ -2,16 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace beratech.Controllers
 {
-    public class PortalController : Controller
+    public class HomeController : Controller
     {
         public IActionResult Index()
         {
             return View();
         }
-
-        public IActionResult Add()
-        {
-            return View();
-        }
     }
 }
+
