@@ -42,6 +42,11 @@ public class AppDbContext : DbContext
                 .HasColumnName("acao_parcial")
                 .IsRequired()
                 .HasDefaultValue(false);
+            
+            entity.Property(e => e.PossuiConflito)
+                .HasColumnName("possui_conflito")
+                .IsRequired()
+                .HasDefaultValue(false);
     
             entity.Property(e => e.DataInicio)
                 .HasColumnName("data_inicio")

@@ -1,382 +1,543 @@
 <!DOCTYPE html>
 <html lang="pt-br" data-theme="light">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>BeraTech | Informações</title>
 
     <!-- Tailwind + DaisyUI CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.jsdelivr.net/npm/@@tailwindcss/browser@4"></script>
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    
+
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+
     <style>
         :root {
-          --color-yellow: #ffcc00;
-          --color-green: #2ecc71;
-          --color-blue: #3498db;
+            --color-yellow: #ffcc00;
+            --color-green: #2ecc71;
+            --color-blue: #3498db;
         }
+
         .loading {
             pointer-events: none;
             opacity: 0.6;
+        }
+
+        #mapContainer {
+            height: 500px;
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 2px dashed #d1d5db;
+            background-color: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 1.125rem;
+        }
+
+        .modal-box {
+            overflow: visible !important;
         }
     </style>
 </head>
 <body class="bg-base-100 text-base-content">
 
-    <!-- Navbar -->
-    <header class="navbar bg-blue-600 text-white shadow-md">
+<!-- Navbar -->
+<div class="navbar bg-base-100 shadow-sm">
+    <div class="flex container mx-auto">
         <div class="flex-1">
-            <a class="btn btn-ghost normal-case text-xl text-white">BeraTech</a>
+            <h1 class="text-3xl font-bold my-2">Beratech</h1>
         </div>
-    </header>
+        <div class="flex gap-2">
+            <div class="dropdown dropdown-end flex justify-center items-center">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                    <div class="w-10 rounded-full">
+                        <img
+                            alt="Tailwind CSS Navbar component"
+                            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"/>
+                    </div>
+                </div>
+                <ul tabindex="-1"
+                    class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
+                    <li>
+                        <a class="justify-between">
+                            Profile
+                            <span class="badge">New</span>
+                        </a>
+                    </li>
+                    <li><a>Settings</a></li>
+                    <li><a>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <main class="container mx-auto px-4 py-8">
+<main class="container mx-auto py-8">
 
-        <!-- Seção Ações -->
-        <section>
-            <div class="card bg-base-100 border border-base-300 shadow-lg">
-                <div class="card-body">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="card-title text-blue-800">Ações</h2>
-                        <button id="btnNovaAcao" class="btn btn-primary">+ Nova Ação</button>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="card-title text-blue-800">Ações</h2>
+        <button id="btnNovaAcao" class="btn btn-soft btn-primary">+ Nova Ação</button>
+    </div>
+
+    <!-- Seção Ações -->
+    <div class="card bg-base-100 border border-base-200 shadow-lg rounded-md">
+        <div id="loadingSpinner" class="text-center py-8 hidden">
+            <span class="loading loading-spinner loading-lg"></span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                <tr>
+                    <th class="w-100">Título</th>
+                    <th>Descrição</th>
+                    <th>Data Início</th>
+                    <th>Data Fim</th>
+                    <th>Obstrução</th>
+                    <th class="w-50">Ações</th>
+                </tr>
+                </thead>
+                <tbody id="tabelaAcoes">
+                <!-- Preenchido via jQuery -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Modal Criar/Editar Ação -->
+<dialog id="modalAcao" class="modal">
+    <div class="modal-box w-11/12 max-w-7xl h-[90vh] flex flex-col p-0">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-base-300">
+            <h3 class="font-bold text-xl" id="modalTitle">Nova Ação</h3>
+        </div>
+
+        <!-- Body com Grid -->
+        <div class="flex-1 overflow-hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-10 gap-0 h-full">
+                <!-- Mapa (70%) -->
+                <div class="lg:col-span-7 p-6 border-r border-base-300 overflow-auto">
+                    <div class="mb-3">
+                        <label class="label">
+                            <span class="label-text font-semibold">Selecione a localização no mapa</span>
+                            <span class="label-text-alt text-info" id="coordenadasDisplay">Clique no mapa</span>
+                        </label>
                     </div>
-                    
-                    <div id="loadingSpinner" class="text-center py-8 hidden">
-                        <span class="loading loading-spinner loading-lg"></span>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="table table-zebra w-full">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Título</th>
-                                    <th>Descrição</th>
-                                    <th>Data Início</th>
-                                    <th>Data Fim</th>
-                                    <th>Parcial</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaAcoes">
-                                <!-- Preenchido via jQuery -->
-                            </tbody>
-                        </table>
-                    </div>
+                    <div id="mapContainer">Espaço reservado para o mapa</div>
+                </div>
+
+                <!-- Formulário (30%) -->
+                <div class="lg:col-span-3 p-6 overflow-auto">
+                    <form id="formAcao" class="space-y-4">
+                        <input type="hidden" id="acaoId"/>
+                        <input type="hidden" id="coordenadas"/>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Título</span>
+                            </label>
+                            <input type="text" id="titulo" class="input input-bordered input-sm" required/>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Descrição</span>
+                            </label>
+                            <textarea id="descricao" class="textarea textarea-bordered textarea-sm" rows="4"
+                                      required></textarea>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Data e Hora Início</span>
+                            </label>
+                            <input type="text"
+                                   id="dataInicio"
+                                   class="input input-bordered input-sm"
+                                   placeholder="Selecione data e hora"
+                                   required/>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Data e Hora Fim</span>
+                            </label>
+                            <input type="text"
+                                   id="dataFim"
+                                   class="input input-bordered input-sm"
+                                   placeholder="Selecione data e hora"
+                                   required/>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label cursor-pointer justify-start gap-2">
+                                <input type="checkbox" id="acaoParcial" class="checkbox checkbox-primary checkbox-sm"/>
+                                <span class="label-text">Ação Parcial</span>
+                            </label>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </section>
-    </main>
-
-    <!-- Modal Criar/Editar Ação -->
-    <dialog id="modalAcao" class="modal">
-        <div class="modal-box w-11/12 max-w-2xl">
-            <h3 class="font-bold text-lg mb-4" id="modalTitle">Nova Ação</h3>
-            
-            <form id="formAcao">
-                <input type="hidden" id="acaoId" />
-                
-                <div class="form-control mb-4">
-                    <label class="label">
-                        <span class="label-text">Título</span>
-                    </label>
-                    <input type="text" id="titulo" class="input input-bordered" required />
-                </div>
-
-                <div class="form-control mb-4">
-                    <label class="label">
-                        <span class="label-text">Descrição</span>
-                    </label>
-                    <textarea id="descricao" class="textarea textarea-bordered" rows="3" required></textarea>
-                </div>
-
-                <div class="form-control mb-4">
-                    <label class="label">
-                        <span class="label-text">Coordenadas</span>
-                    </label>
-                    <input type="text" id="coordenadas" class="input input-bordered" placeholder="-23.550520, -46.633308" />
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">Data Início</span>
-                        </label>
-                        <input type="datetime-local" id="dataInicio" class="input input-bordered" required />
-                    </div>
-
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">Data Fim</span>
-                        </label>
-                        <input type="datetime-local" id="dataFim" class="input input-bordered" required />
-                    </div>
-                </div>
-
-                <div class="form-control mb-6">
-                    <label class="label cursor-pointer justify-start gap-2">
-                        <input type="checkbox" id="acaoParcial" class="checkbox checkbox-primary" />
-                        <span class="label-text">Ação Parcial</span>
-                    </label>
-                </div>
-
-                <div class="modal-action">
-                    <button type="button" class="btn" onclick="modalAcao.close()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" id="btnSalvar">Salvar</button>
-                </div>
-            </form>
         </div>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
-        </form>
-    </dialog>
 
-    <!-- Script -->
-    <script>
-        const API_URL = '/api/acoes';
+        <!-- Footer -->
+        <div class="px-6 py-4 border-t border-base-300 flex justify-end gap-2">
+            <button type="button" class="btn btn-ghost" onclick="modalAcao.close()">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="btnSalvar">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Salvar
+            </button>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
 
-        // Configuração do SweetAlert2
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
+<!-- Script -->
+<script>
+    const API_URL = '/api/acoes';
+
+    let flatpickrInicio;
+    let flatpickrFim;
+
+    // Configuração do SweetAlert2
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+
+    // Funções auxiliares
+    function mostrarLoading(show) {
+        if (show) {
+            $('#loadingSpinner').removeClass('hidden');
+            $('#tabelaAcoes').addClass('loading');
+        } else {
+            $('#loadingSpinner').addClass('hidden');
+            $('#tabelaAcoes').removeClass('loading');
+        }
+    }
+
+    function mostrarErro(mensagem, detalhes = null) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro!',
+            text: mensagem,
+            footer: detalhes ? `<small>${detalhes}</small>` : null,
+            confirmButtonColor: '#3b82f6'
         });
+    }
 
-        // Funções auxiliares
-        function mostrarLoading(show) {
-            if (show) {
-                $('#loadingSpinner').removeClass('hidden');
-                $('#tabelaAcoes').addClass('loading');
-            } else {
-                $('#loadingSpinner').addClass('hidden');
-                $('#tabelaAcoes').removeClass('loading');
+    function mostrarSucesso(mensagem) {
+        Toast.fire({
+            icon: 'success',
+            title: mensagem
+        });
+    }
+
+    function formatarData(dataStr) {
+        const data = new Date(dataStr);
+        return data.toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function tratarErroAPI(xhr) {
+        let mensagem = 'Erro desconhecido';
+        let detalhes = null;
+
+        if (xhr.responseJSON) {
+            mensagem = xhr.responseJSON.message || mensagem;
+            detalhes = xhr.responseJSON.error || null;
+        } else if (xhr.responseText) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                mensagem = response.message || mensagem;
+                detalhes = response.error || null;
+            } catch (e) {
+                mensagem = xhr.responseText;
             }
         }
 
-        function mostrarErro(mensagem, detalhes = null) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Erro!',
-                text: mensagem,
-                footer: detalhes ? `<small>${detalhes}</small>` : null,
-                confirmButtonColor: '#3b82f6'
-            });
-        }
+        return {mensagem, detalhes};
+    }
 
-        function mostrarSucesso(mensagem) {
-            Toast.fire({
-                icon: 'success',
-                title: mensagem
-            });
-        }
+    // Carregar ações do backend
+    function carregarAcoes() {
+        mostrarLoading(true);
 
-        function formatarData(dataStr) {
-            const data = new Date(dataStr);
-            return data.toLocaleString('pt-BR', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
+        $.ajax({
+            url: API_URL,
+            method: 'GET',
+            success: function (response) {
+                const acoes = response;
+                const tbody = $('#tabelaAcoes');
+                tbody.empty();
 
-        function formatarDataParaInput(dataStr) {
-            const data = new Date(dataStr);
-            const ano = data.getFullYear();
-            const mes = String(data.getMonth() + 1).padStart(2, '0');
-            const dia = String(data.getDate()).padStart(2, '0');
-            const hora = String(data.getHours()).padStart(2, '0');
-            const minuto = String(data.getMinutes()).padStart(2, '0');
-            return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
-        }
-
-        function tratarErroAPI(xhr) {
-            let mensagem = 'Erro desconhecido';
-            let detalhes = null;
-
-            if (xhr.responseJSON) {
-                mensagem = xhr.responseJSON.message || mensagem;
-                detalhes = xhr.responseJSON.error || null;
-            } else if (xhr.responseText) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    mensagem = response.message || mensagem;
-                    detalhes = response.error || null;
-                } catch (e) {
-                    mensagem = xhr.responseText;
-                }
-            }
-
-            return { mensagem, detalhes };
-        }
-
-        // Carregar ações do backend
-        function carregarAcoes() {
-            mostrarLoading(true);
-            
-            $.ajax({
-                url: API_URL,
-                method: 'GET',
-                success: function(response) {
-                    const acoes = response;
-                    const tbody = $('#tabelaAcoes');
-                    tbody.empty();
-
-                    if (acoes.length === 0) {
-                        tbody.append('<tr><td colspan="7" class="text-center text-gray-500">Nenhuma ação cadastrada</td></tr>');
-                    } else {
-                        acoes.forEach(acao => {
-                            tbody.append(`
+                if (acoes.length === 0) {
+                    tbody.append('<tr><td colspan="6" class="text-center text-gray-500">Nenhuma ação cadastrada</td></tr>');
+                } else {
+                    acoes.forEach(acao => {
+                        
+                        console.log(acao);
+                        
+                        tbody.append(`
                                 <tr>
-                                    <td>${acao.id}</td>
-                                    <td>${acao.titulo}</td>
+                                    <td>
+                                        <div class="flex items-center gap-2">
+                                            ${acao.possuiConflito ? `
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current text-warning" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                            ` : ''}
+                                            <span>${acao.titulo}</span>
+                                        </div>
+                                    </td>
                                     <td>${acao.descricao}</td>
                                     <td>${formatarData(acao.dataInicio)}</td>
                                     <td>${formatarData(acao.dataFim)}</td>
                                     <td>
-                                        <span class="badge ${acao.acaoParcial ? 'badge-warning' : 'badge-success'}">
-                                            ${acao.acaoParcial ? 'Sim' : 'Não'}
+                                        <span class="badge badge-soft ${acao.acaoParcial ? 'badge-success' : 'badge-warning'}">
+                                            ${acao.acaoParcial ? 'Parcial' : 'Total'}
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-info mr-2" onclick="editarAcao(${acao.id})">Editar</button>
-                                        <button class="btn btn-sm btn-error" onclick="excluirAcao(${acao.id})">Excluir</button>
+                                        <button class="btn btn-sm btn-soft btn-info mr-2" onclick="editarAcao(${acao.id})">Editar</button>
+                                        <button class="btn btn-sm btn-soft btn-error" onclick="excluirAcao(${acao.id})">Excluir</button>
                                     </td>
                                 </tr>
                             `);
-                        });
-                    }
-                },
-                error: function(xhr) {
-                    const erro = tratarErroAPI(xhr);
-                    mostrarErro(erro.mensagem, erro.detalhes);
-                },
-                complete: function() {
-                    mostrarLoading(false);
-                }
-            });
-        }
-
-        function abrirModal(acao = null) {
-            if (acao) {
-                $('#modalTitle').text('Editar Ação');
-                $('#acaoId').val(acao.id);
-                $('#titulo').val(acao.titulo);
-                $('#descricao').val(acao.descricao);
-                $('#coordenadas').val(acao.coordenadas);
-                $('#dataInicio').val(formatarDataParaInput(acao.dataInicio));
-                $('#dataFim').val(formatarDataParaInput(acao.dataFim));
-                $('#acaoParcial').prop('checked', acao.acaoParcial);
-            } else {
-                $('#modalTitle').text('Nova Ação');
-                $('#formAcao')[0].reset();
-                $('#acaoId').val('');
-            }
-            modalAcao.showModal();
-        }
-
-        function editarAcao(id) {
-            $.ajax({
-                url: `${API_URL}/${id}`,
-                method: 'GET',
-                success: function(acao) {
-                    abrirModal(acao);
-                },
-                error: function(xhr) {
-                    const erro = tratarErroAPI(xhr);
-                    mostrarErro(erro.mensagem, erro.detalhes);
-                }
-            });
-        }
-
-        function excluirAcao(id) {
-            Swal.fire({
-                title: 'Tem certeza?',
-                text: "Esta ação não poderá ser revertida!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Sim, excluir!',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `${API_URL}/${id}`,
-                        method: 'DELETE',
-                        success: function() {
-                            mostrarSucesso('Ação excluída com sucesso!');
-                            carregarAcoes();
-                        },
-                        error: function(xhr) {
-                            const erro = tratarErroAPI(xhr);
-                            mostrarErro(erro.mensagem, erro.detalhes);
-                        }
                     });
                 }
-            });
+            },
+            error: function (xhr) {
+                const erro = tratarErroAPI(xhr);
+                mostrarErro(erro.mensagem, erro.detalhes);
+            },
+            complete: function () {
+                mostrarLoading(false);
+            }
+        });
+    }
+
+    // Inicializar Flatpickr DENTRO do modal após ele abrir
+    function inicializarDatePickers() {
+        // Destruir instâncias anteriores
+        if (flatpickrInicio) {
+            flatpickrInicio.destroy();
+        }
+        if (flatpickrFim) {
+            flatpickrFim.destroy();
         }
 
-        // Event Listeners
-        $('#btnNovaAcao').on('click', () => abrirModal());
+        // Data e Hora de Início
+        flatpickrInicio = flatpickr("#dataInicio", {
+            enableTime: true,
+            dateFormat: "d/m/Y H:i",
+            time_24hr: true,
+            locale: "pt",
+            minDate: "today",
+            minuteIncrement: 15,
+            defaultHour: 8,
+            defaultMinute: 0,
+            appendTo: document.querySelector('.modal-box'),
+            onChange: function (selectedDates, dateStr, instance) {
+                if (flatpickrFim && selectedDates.length > 0) {
+                    flatpickrFim.set('minDate', selectedDates[0]);
 
-        $('#formAcao').on('submit', function(e) {
-            e.preventDefault();
-
-            const id = $('#acaoId').val();
-            const dados = {
-                titulo: $('#titulo').val(),
-                descricao: $('#descricao').val(),
-                coordenadas: $('#coordenadas').val(),
-                dataInicio: new Date($('#dataInicio').val()).toISOString(),
-                dataFim: new Date($('#dataFim').val()).toISOString(),
-                acaoParcial: $('#acaoParcial').is(':checked')
-            };
-
-            const isEdicao = id !== '';
-            if (isEdicao) {
-                dados.id = parseInt(id);
-            }
-
-            $('#btnSalvar').prop('disabled', true).addClass('loading');
-
-            $.ajax({
-                url: isEdicao ? `${API_URL}/${id}` : API_URL,
-                method: isEdicao ? 'PUT' : 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(dados),
-                success: function() {
-                    modalAcao.close();
-                    mostrarSucesso(isEdicao ? 'Ação atualizada com sucesso!' : 'Ação criada com sucesso!');
-                    carregarAcoes();
-                },
-                error: function(xhr) {
-                    const erro = tratarErroAPI(xhr);
-                    mostrarErro(erro.mensagem, erro.detalhes);
-                },
-                complete: function() {
-                    $('#btnSalvar').prop('disabled', false).removeClass('loading');
+                    if (flatpickrFim.selectedDates.length > 0 &&
+                        flatpickrFim.selectedDates[0] < selectedDates[0]) {
+                        flatpickrFim.clear();
+                    }
                 }
-            });
+            }
         });
 
-        // Carregar ao iniciar
-        $(document).ready(() => {
-            carregarAcoes();
+        // Data e Hora de Fim
+        flatpickrFim = flatpickr("#dataFim", {
+            enableTime: true,
+            dateFormat: "d/m/Y H:i",
+            time_24hr: true,
+            locale: "pt",
+            minDate: "today",
+            minuteIncrement: 15,
+            defaultHour: 17,
+            defaultMinute: 0,
+            appendTo: document.querySelector('.modal-box')
         });
-    </script>
+
+        console.log('Flatpickr inicializado:', flatpickrInicio, flatpickrFim);
+    }
+
+    function abrirModal(acao = null) {
+        if (acao) {
+            $('#modalTitle').text('Editar Ação');
+            $('#acaoId').val(acao.id);
+            $('#titulo').val(acao.titulo);
+            $('#descricao').val(acao.descricao);
+            $('#coordenadas').val(acao.coordenadas);
+            $('#acaoParcial').prop('checked', acao.acaoParcial);
+        } else {
+            $('#modalTitle').text('Nova Ação');
+            $('#formAcao')[0].reset();
+            $('#acaoId').val('');
+        }
+
+        modalAcao.showModal();
+
+        // Inicializar Flatpickr DEPOIS que o modal abrir
+        setTimeout(() => {
+            inicializarDatePickers();
+
+            // Se for edição, setar as datas
+            if (acao) {
+                const dataInicio = new Date(acao.dataInicio);
+                const dataFim = new Date(acao.dataFim);
+                flatpickrInicio.setDate(dataInicio);
+                flatpickrFim.setDate(dataFim);
+            }
+        }, 200);
+    }
+
+    function editarAcao(id) {
+        $.ajax({
+            url: `${API_URL}/${id}`,
+            method: 'GET',
+            success: function (acao) {
+                abrirModal(acao);
+            },
+            error: function (xhr) {
+                const erro = tratarErroAPI(xhr);
+                mostrarErro(erro.mensagem, erro.detalhes);
+            }
+        });
+    }
+
+    function excluirAcao(id) {
+        Swal.fire({
+            title: 'Tem certeza?',
+            text: "Esta ação não poderá ser revertida!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `${API_URL}/${id}`,
+                    method: 'DELETE',
+                    success: function () {
+                        mostrarSucesso('Ação excluída com sucesso!');
+                        carregarAcoes();
+                    },
+                    error: function (xhr) {
+                        const erro = tratarErroAPI(xhr);
+                        mostrarErro(erro.mensagem, erro.detalhes);
+                    }
+                });
+            }
+        });
+    }
+
+    // Event Listeners
+    $('#btnNovaAcao').on('click', () => abrirModal());
+
+    $('#btnSalvar').on('click', function (e) {
+        e.preventDefault();
+
+        // Validar datas
+        const dataInicioVal = flatpickrInicio.selectedDates[0];
+        const dataFimVal = flatpickrFim.selectedDates[0];
+
+        if (!dataInicioVal || !dataFimVal) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Atenção',
+                text: 'Por favor, preencha as datas de início e fim',
+                confirmButtonColor: '#3b82f6'
+            });
+            return;
+        }
+
+        if (dataFimVal <= dataInicioVal) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Atenção',
+                text: 'A data de fim deve ser posterior à data de início',
+                confirmButtonColor: '#3b82f6'
+            });
+            return;
+        }
+
+        const id = $('#acaoId').val();
+        const dados = {
+            titulo: $('#titulo').val(),
+            descricao: $('#descricao').val(),
+            coordenadas: $('#coordenadas').val(),
+            dataInicio: dataInicioVal.toISOString(),
+            dataFim: dataFimVal.toISOString(),
+            acaoParcial: $('#acaoParcial').is(':checked')
+        };
+
+        const isEdicao = id !== '';
+        if (isEdicao) {
+            dados.id = parseInt(id);
+        }
+
+        $('#btnSalvar').prop('disabled', true).addClass('loading');
+
+        $.ajax({
+            url: isEdicao ? `${API_URL}/${id}` : API_URL,
+            method: isEdicao ? 'PUT' : 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dados),
+            success: function () {
+                modalAcao.close();
+                mostrarSucesso(isEdicao ? 'Ação atualizada com sucesso!' : 'Ação criada com sucesso!');
+                carregarAcoes();
+            },
+            error: function (xhr) {
+                const erro = tratarErroAPI(xhr);
+                mostrarErro(erro.mensagem, erro.detalhes);
+            },
+            complete: function () {
+                $('#btnSalvar').prop('disabled', false).removeClass('loading');
+            }
+        });
+    });
+
+    // Inicializar ao carregar
+    $(document).ready(function () {
+        carregarAcoes();
+    });
+</script>
 </body>
 </html>
