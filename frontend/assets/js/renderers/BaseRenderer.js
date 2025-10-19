@@ -3,7 +3,10 @@
  *
  * Fornece funcionalidades comuns para todos os tipos de geometria
  * Reduz duplicação de código entre renderers
+ * Suporta internacionalização (i18n)
  */
+
+import { getTranslation, isLanguageAvailable } from '../utils/translations.js';
 
 export class BaseRenderer {
   /**
@@ -20,8 +23,16 @@ export class BaseRenderer {
       debug: options.debug || false,
       enablePopup: options.enablePopup !== false,
       enableTooltip: options.enableTooltip !== false,
+      language: options.language || 'pt-BR',
       ...options
     };
+    
+    // Validar idioma, usar pt-BR como fallback
+    if (!isLanguageAvailable(this.config.language)) {
+      console.warn(`Idioma '${this.config.language}' não disponível. Usando 'pt-BR'.`);
+      this.config.language = 'pt-BR';
+    }
+    
     this.defaultStyle = options.defaultStyle || {};
   }
   
@@ -111,6 +122,28 @@ export class BaseRenderer {
    */
   getDefaultStyle() {
     return Object.assign({}, this.defaultStyle);
+  }
+  
+  /**
+   * Define o idioma para tradução
+   * @param {string} language - Código do idioma (ex: 'pt-BR', 'en-US')
+   * @returns {boolean} Sucesso
+   */
+  setLanguage(language) {
+    if (!isLanguageAvailable(language)) {
+      console.warn(`Idioma '${language}' não disponível.`);
+      return false;
+    }
+    this.config.language = language;
+    return true;
+  }
+  
+  /**
+   * Obtém o idioma atual
+   * @returns {string} Código do idioma
+   */
+  getLanguage() {
+    return this.config.language;
   }
   
   /**
@@ -218,6 +251,99 @@ export class BaseRenderer {
    */
   _logError(message) {
     console.error(`[${this.geometryType}Renderer] ❌ ${message}`);
+  }
+  
+  /**
+   * Cria conteúdo HTML para popup com tradução
+   * @protected
+   * @param {Object} feature - Feature GeoJSON
+   * @param {Object} metadata - Metadados adicionais
+   * @returns {string} HTML do popup
+   */
+  _createPopupContent(feature, metadata = {}) {
+    const properties = feature.properties || {};
+    const hasProperties = Object.keys(properties).length > 0;
+    
+    let html = '<div class="bera-popup">';
+    
+    // Adicionar título se existir
+    if (properties.name) {
+      html += `<h3 style="margin: 0 0 8px 0; font-weight: bold;">${this._escapeHtml(properties.name)}</h3>`;
+    }
+    
+    // Adicionar descrição se existir
+    if (properties.description) {
+      html += `<p style="margin: 0 0 8px 0; font-size: 0.9em;">${this._escapeHtml(properties.description)}</p>`;
+    }
+    
+    // Mapeamento de chaves para labels de tradução
+    const keyTranslationMap = {
+      'area': 'popupLabels.area',
+      'perimeter': 'popupLabels.perimeter',
+      'length': 'popupLabels.length',
+      'circumference': 'popupLabels.circumference',
+      'radius': 'popupLabels.radius',
+      'isClosed': 'popupLabels.isClosed',
+      'type': 'popupLabels.type'
+    };
+    
+    // Adicionar metadados calculados (área, comprimento, etc)
+    if (metadata && Object.keys(metadata).length > 0) {
+      html += '<hr style="margin: 8px 0; border: none; border-top: 1px solid #ccc;">';
+      Object.entries(metadata).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && key !== 'uuid' && key !== 'feature' && key !== 'style' && key !== 'latLng') {
+          let displayValue = value;
+          
+          // Formatar números com muitas casas decimais
+          if (typeof value === 'number') {
+            displayValue = value.toFixed(2);
+          }
+          
+          // Traduzir tipo se for 'polygon' ou 'polyline'
+          if (key === 'type' && (value === 'polygon' || value === 'polyline')) {
+            displayValue = getTranslation(
+              this.config.language,
+              `geometryTypes.${value}`,
+              value
+            );
+          }
+          
+          // Traduzir label e valor de isClosed
+          let label = keyTranslationMap[key];
+          if (!label) {
+            // Criar label legível caso não exista no mapa
+            label = key.replace(/([A-Z])/g, ' $1').trim();
+            label = label.charAt(0).toUpperCase() + label.slice(1);
+          } else {
+            // Obter label traduzido
+            label = getTranslation(this.config.language, label, label);
+          }
+          
+          // Traduzir valor boolean
+          if (key === 'isClosed' && typeof value === 'boolean') {
+            displayValue = value ? 'Sim' : 'Não';
+            if (this.config.language === 'en-US') {
+              displayValue = value ? 'Yes' : 'No';
+            }
+          }
+          
+          html += `<div style="margin: 4px 0; font-size: 0.85em;"><strong>${label}:</strong> ${displayValue}</div>`;
+        }
+      });
+    }
+    
+    // Se não há propriedades e nenhum metadado, mostrar mensagem padrão
+    if (!hasProperties && (!metadata || Object.keys(metadata).length === 0)) {
+      const noInfoText = getTranslation(
+        this.config.language,
+        'popupLabels.noInfo',
+        'Sem informações disponíveis'
+      );
+      html += `<p style="margin: 0; font-size: 0.9em; color: #999; font-style: italic;">${noInfoText}</p>`;
+    }
+    
+    html += '</div>';
+    return html;
   }
 }
 

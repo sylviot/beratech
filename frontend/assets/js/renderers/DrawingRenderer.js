@@ -184,9 +184,17 @@ export class DrawingRenderer extends BaseRenderer {
   // ===================================================================
   
   _attachEventListeners(layer, uuid, feature) {
-    // Click
+    // Click - Exibir popup
     layer.on('click', (e) => {
       const geometryData = this.beraMap._geoManager.getGeometryByUUID(uuid);
+      const metadata = layer._beraMetadata || {};
+      
+      // Criar e abrir popup
+      if (this.config.enablePopup) {
+        const popupContent = this._createPopupContent(feature, metadata);
+        layer.bindPopup(popupContent).openPopup(e.latlng);
+      }
+      
       this.beraMap._eventManager.triggerGeometryClicked(uuid, geometryData, e);
       this._log(`Drawing clicado: ${uuid}`);
     });

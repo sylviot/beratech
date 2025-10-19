@@ -3,7 +3,9 @@
   "features": [
     {
       "type": "Feature",
-      "properties": {},
+      "properties": {
+        "name": "Linha 1"
+      },
       "geometry": {
         "type": "LineString",
         "coordinates": [
@@ -20,7 +22,9 @@
     },
     {
       "type": "Feature",
-      "properties": {},
+      "properties": {
+        "name": "Linha 2"
+      },
       "geometry": {
         "type": "LineString",
         "coordinates": [
@@ -53,7 +57,9 @@
     },
     {
       "type": "Feature",
-      "properties": {},
+      "properties": {
+        "name": "Linha 3"
+      },
       "geometry": {
         "type": "LineString",
         "coordinates": [
@@ -74,7 +80,9 @@
     },
     {
       "type": "Feature",
-      "properties": {},
+      "properties": {
+        "name": "Polígono 1"
+      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -109,7 +117,9 @@
     },
     {
       "type": "Feature",
-      "properties": {},
+      "properties": {
+        "name": "Polígono 2"
+      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -152,7 +162,9 @@
     },
     {
       "type": "Feature",
-      "properties": {},
+      "properties": {
+        "name": "Polígono 3"
+      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -183,7 +195,9 @@
     },
     {
       "type": "Feature",
-      "properties": {},
+      "properties": {
+        "name": "Polígono 4"
+      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -226,7 +240,9 @@
     },
     {
       "type": "Feature",
-      "properties": {},
+      "properties": {
+        "name": "Polígono 5"
+      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [

@@ -172,9 +172,17 @@ export class PolygonRenderer extends BaseRenderer {
   // ===================================================================
   
   _attachEventListeners(polygon, uuid, feature) {
-    // Click
+    // Click - Exibir popup
     polygon.on('click', (e) => {
       const geometryData = this.beraMap._geoManager.getGeometryByUUID(uuid);
+      const metadata = polygon._beraMetadata || {};
+      
+      // Criar e abrir popup
+      if (this.config.enablePopup) {
+        const popupContent = this._createPopupContent(feature, metadata);
+        polygon.bindPopup(popupContent).openPopup(e.latlng);
+      }
+      
       this.beraMap._eventManager.triggerGeometryClicked(uuid, geometryData, e);
       this._log(`Polygon clicado: ${uuid}`);
     });

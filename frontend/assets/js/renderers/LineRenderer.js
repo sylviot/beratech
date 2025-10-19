@@ -134,9 +134,17 @@ export class LineRenderer extends BaseRenderer {
   // ===================================================================
   
   _attachEventListeners(polyline, uuid, feature) {
-    // Click
+    // Click - Exibir popup
     polyline.on('click', (e) => {
       const geometryData = this.beraMap._geoManager.getGeometryByUUID(uuid);
+      const metadata = polyline._beraMetadata || {};
+      
+      // Criar e abrir popup
+      if (this.config.enablePopup) {
+        const popupContent = this._createPopupContent(feature, metadata);
+        polyline.bindPopup(popupContent).openPopup(e.latlng);
+      }
+      
       this.beraMap._eventManager.triggerGeometryClicked(uuid, geometryData, e);
       this._log(`LineString clicado: ${uuid}`);
     });

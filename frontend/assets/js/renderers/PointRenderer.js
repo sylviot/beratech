@@ -112,9 +112,17 @@ export class PointRenderer extends BaseRenderer {
   // ===================================================================
   
   _attachEventListeners(marker, uuid, feature) {
-    // Click
+    // Click - Exibir popup
     marker.on('click', (e) => {
       const geometryData = this.beraMap._geoManager.getGeometryByUUID(uuid);
+      const metadata = marker._beraMetadata || {};
+      
+      // Criar e abrir popup
+      if (this.config.enablePopup) {
+        const popupContent = this._createPopupContent(feature, metadata);
+        marker.bindPopup(popupContent).openPopup();
+      }
+      
       this.beraMap._eventManager.triggerGeometryClicked(uuid, geometryData, e);
       this._log(`Point clicado: ${uuid}`);
     });
