@@ -9,6 +9,7 @@ public class Acao
     public string Coordenadas { get; set; }
 
     public bool AcaoParcial { get; set; }
+    public bool PossuiConflito { get; set; }
     
     public DateTime DataInicio { get; set; }
     public DateTime DataFim { get; set; }
