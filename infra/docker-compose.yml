@@ -8,6 +8,10 @@ services:
     restart: always
     ports:
       - "80:8080"
+    depends_on:
+      - db
+    networks:
+      - pgnetwork
   db:
     image: postgis/postgis:16-3.4
     container_name: postgis_db
