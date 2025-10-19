@@ -1,13 +1,13 @@
 services:
   web:
-    image: httpd:2.4
-    container_name: my-apache-app
+    image: beratech
+    container_name: beratech
+    build:
+      context: ../beratech
+      dockerfile: ../beratech/Dockerfile
     restart: always
     ports:
-      - "8080:80"
-    volumes:
-      # monta a pasta atual no diretório padrão do Apache
-      - ../linhas:/usr/local/apache2/htdocs:Z
+      - "80:8080"
   db:
     image: postgis/postgis:16-3.4
     container_name: postgis_db
