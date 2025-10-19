@@ -2,6 +2,7 @@
  * CircleRenderer - Renderizador de Circles para BeraMap
  *
  * Responsável por renderizar círculos com raio configurável
+ * Suporta animação de pulsação usando JavaScript puro
  */
 
 import { BaseRenderer } from './BaseRenderer.js';
@@ -19,6 +20,13 @@ export class CircleRenderer extends BaseRenderer {
       }
     });
     this.config.defaultRadius = options.defaultRadius || 500;
+    this.config.enablePulse = options.enablePulse !== false;
+    this.config.pulseOpacityMin = options.pulseOpacityMin || 0.3;
+    this.config.pulseOpacityMax = options.pulseOpacityMax || 0.8;
+    this.config.pulseDuration = options.pulseDuration || 1500;
+    
+    this.pulsingCircles = new Set();
+    this.pulseAnimations = new Map(); // Mapear UUID -> animationId
   }
   
   /**
@@ -83,10 +91,18 @@ export class CircleRenderer extends BaseRenderer {
         latLng: latLng,
         radius: radius,
         area: this._calculateArea(radius),
-        circumference: this._calculateCircumference(radius)
+        circumference: this._calculateCircumference(radius),
+        isPulsing: false
       };
       
       this._attachEventListeners(circle, uuid, feature);
+      
+      // Aplicar pulsação se habilitada
+      if (this.config.enablePulse) {
+        setTimeout(() => {
+          this.startPulse(uuid);
+        }, 100);
+      }
       
       this._log(`Circle renderizado: ${uuid}`);
       return circle;
@@ -121,6 +137,166 @@ export class CircleRenderer extends BaseRenderer {
   update(uuid, feature, style = {}) {
     this.remove(uuid);
     return this.render(uuid, feature, style);
+  }
+  
+  /**
+   * Inicia a pulsação de um círculo
+   * @param {string} uuid - UUID
+   * @returns {boolean} Sucesso
+   */
+  startPulse(uuid) {
+    if (!this.renderedLayers[uuid]) {
+      this._logError(`Círculo não encontrado: ${uuid}`);
+      return false;
+    }
+    
+    // Se já está pulsando, não iniciar novamente
+    if (this.pulsingCircles.has(uuid)) {
+      return true;
+    }
+    
+    const circle = this.renderedLayers[uuid];
+    const metadata = circle._beraMetadata;
+    const minOpacity = this.config.pulseOpacityMin;
+    const maxOpacity = this.config.pulseOpacityMax;
+    const duration = this.config.pulseDuration;
+    
+    let startTime = null;
+    let animationId = null;
+    
+    // Função de animação
+    const animate = (currentTime) => {
+      if (!startTime) {
+        startTime = currentTime;
+      }
+      
+      // Calcular progresso da animação (0 a 1)
+      const elapsed = (currentTime - startTime) % duration;
+      let progress = elapsed / duration;
+      
+      // Função senoidal para suavidade
+      let opacity;
+      if (progress < 0.5) {
+        // Primeira metade: aumentar de minOpacity para maxOpacity
+        opacity = minOpacity + (maxOpacity - minOpacity) * (progress * 2);
+      } else {
+        // Segunda metade: diminuir de maxOpacity para minOpacity
+        opacity = maxOpacity - (maxOpacity - minOpacity) * ((progress - 0.5) * 2);
+      }
+      
+      // Aplicar opacidade ao círculo
+      try {
+        circle.setStyle({
+          fillOpacity: opacity
+        });
+      } catch (e) {
+        this._logError(`Erro ao aplicar estilo: ${e.message}`);
+      }
+      
+      // Continuar animação se ainda está pulsando
+      if (this.pulsingCircles.has(uuid)) {
+        animationId = requestAnimationFrame(animate);
+      }
+    };
+    
+    // Marcar como pulsando e iniciar animação
+    this.pulsingCircles.add(uuid);
+    if (metadata) {
+      metadata.isPulsing = true;
+    }
+    
+    animationId = requestAnimationFrame(animate);
+    this.pulseAnimations.set(uuid, animationId);
+    
+    this._log(`Pulsação iniciada: ${uuid}`);
+    return true;
+  }
+  
+  /**
+   * Para a pulsação de um círculo
+   * @param {string} uuid - UUID
+   * @returns {boolean} Sucesso
+   */
+  stopPulse(uuid) {
+    if (!this.renderedLayers[uuid]) {
+      return false;
+    }
+    
+    const circle = this.renderedLayers[uuid];
+    const metadata = circle._beraMetadata;
+    const animationId = this.pulseAnimations.get(uuid);
+    
+    // Cancelar animação
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      this.pulseAnimations.delete(uuid);
+    }
+    
+    this.pulsingCircles.delete(uuid);
+    
+    if (metadata) {
+      metadata.isPulsing = false;
+      // Restaurar opacidade original
+      try {
+        circle.setStyle({
+          fillOpacity: metadata.style.fillOpacity
+        });
+      } catch (e) {
+        // Ignorar erro
+      }
+    }
+    
+    this._log(`Pulsação parada: ${uuid}`);
+    return true;
+  }
+  
+  /**
+   * Alterna pulsação de um círculo
+   * @param {string} uuid - UUID
+   * @returns {boolean} Novo estado (true = pulsando, false = parado)
+   */
+  togglePulse(uuid) {
+    if (!this.renderedLayers[uuid]) {
+      return false;
+    }
+    
+    const metadata = this.renderedLayers[uuid]._beraMetadata;
+    if (metadata && metadata.isPulsing) {
+      this.stopPulse(uuid);
+      return false;
+    } else {
+      this.startPulse(uuid);
+      return true;
+    }
+  }
+  
+  /**
+   * Para pulsação de todos os círculos
+   * @returns {number} Quantidade de círculos afetados
+   */
+  stopAllPulses() {
+    let count = 0;
+    const uuidsToStop = Array.from(this.pulsingCircles);
+    uuidsToStop.forEach(uuid => {
+      if (this.stopPulse(uuid)) {
+        count++;
+      }
+    });
+    return count;
+  }
+  
+  /**
+   * Inicia pulsação de todos os círculos
+   * @returns {number} Quantidade de círculos afetados
+   */
+  startAllPulses() {
+    let count = 0;
+    Object.keys(this.renderedLayers).forEach(uuid => {
+      if (this.startPulse(uuid)) {
+        count++;
+      }
+    });
+    return count;
   }
   
   /**
