@@ -7,8 +7,8 @@
         "name": "Linha 1",
         "responsavel": "João Silva",
         "situacao": "Em Execução",
-        "dataInicio": "2024-01-15",
-        "dataFim": "2024-03-15"
+        "dataInicio": "2025-10-17",
+        "dataFim": "2025-10-18"
       },
       "geometry": {
         "type": "LineString",
@@ -24,8 +24,8 @@
         "name": "Linha 2",
         "responsavel": "Maria Santos",
         "situacao": "Planejamento",
-        "dataInicio": "2024-02-01",
-        "dataFim": "2024-04-30"
+        "dataInicio": "2025-10-17",
+        "dataFim": "2025-10-19"
       },
       "geometry": {
         "type": "LineString",
@@ -45,8 +45,8 @@
         "name": "Linha 3",
         "responsavel": "Pedro Oliveira",
         "situacao": "Concluído",
-        "dataInicio": "2023-11-01",
-        "dataFim": "2024-01-10"
+        "dataInicio": "2025-10-17",
+        "dataFim": "2025-10-20"
       },
       "geometry": {
         "type": "LineString",
@@ -63,8 +63,8 @@
         "name": "Polígono 1",
         "responsavel": "Ana Costa",
         "situacao": "Em Execução",
-        "dataInicio": "2024-01-20",
-        "dataFim": "2024-05-20"
+        "dataInicio": "2025-10-18",
+        "dataFim": "2025-10-19"
       },
       "geometry": {
         "type": "Polygon",
@@ -86,8 +86,8 @@
         "name": "Polígono 2",
         "responsavel": "João Silva",
         "situacao": "Pausado",
-        "dataInicio": "2024-01-10",
-        "dataFim": "2024-06-10"
+        "dataInicio": "2025-10-18",
+        "dataFim": "2025-10-20"
       },
       "geometry": {
         "type": "Polygon",
@@ -111,8 +111,8 @@
         "name": "Polígono 3",
         "responsavel": "Maria Santos",
         "situacao": "Concluído",
-        "dataInicio": "2023-09-01",
-        "dataFim": "2023-12-31"
+        "dataInicio": "2025-10-19",
+        "dataFim": "2025-10-20"
       },
       "geometry": {
         "type": "Polygon",
@@ -133,8 +133,8 @@
         "name": "Polígono 4",
         "responsavel": "Pedro Oliveira",
         "situacao": "Planejamento",
-        "dataInicio": "2024-03-01",
-        "dataFim": "2024-08-01"
+        "dataInicio": "2025-10-17",
+        "dataFim": "2025-10-20"
       },
       "geometry": {
         "type": "Polygon",
@@ -158,8 +158,8 @@
         "name": "Polígono 5",
         "responsavel": "Ana Costa",
         "situacao": "Em Execução",
-        "dataInicio": "2024-02-15",
-        "dataFim": "2024-07-15"
+        "dataInicio": "2025-10-18",
+        "dataFim": "2025-10-18"
       },
       "geometry": {
         "type": "Polygon",
@@ -181,8 +181,8 @@
         "description": "Círculo que cobre toda a área",
         "responsavel": "João Silva",
         "situacao": "Concluído",
-        "dataInicio": "2023-12-01",
-        "dataFim": "2024-02-01",
+        "dataInicio": "2025-10-19",
+        "dataFim": "2025-10-20",
         "radius": 400
       },
       "geometry": {

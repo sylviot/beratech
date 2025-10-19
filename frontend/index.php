@@ -83,8 +83,6 @@
           gap: 8px;
       }
 
-      /* ===== ESTILOS PARA FILTROS ===== */
-
       .filter-group {
           margin-bottom: 15px;
       }
@@ -195,7 +193,24 @@
           color: #2e7d32;
       }
 
-      /* ===== MENSAGEM DE CARREGAMENTO ===== */
+      .filter-result-info {
+          background: #fff3e0;
+          border-left: 3px solid #ff9800;
+          padding: 12px;
+          border-radius: 4px;
+          font-size: 12px;
+          margin-top: 12px;
+          display: none;
+      }
+
+      .filter-result-info.active {
+          display: block;
+      }
+
+      .filter-result-info-item {
+          padding: 4px 0;
+          color: #e65100;
+      }
 
       .loading-message {
           text-align: center;
@@ -269,7 +284,7 @@
 
         <!-- Filtro: Período em Data -->
         <div class="filter-group">
-          <label>Período em Data</label>
+          <label>Período</label>
           <div class="filter-date-range">
             <input type="date" id="filterDataInicio" placeholder="Data início">
             <span class="separator">até</span>
@@ -277,15 +292,20 @@
           </div>
         </div>
 
-        <!-- Botões de Ação do Filtro -->
+        <!-- Botões de Ação -->
         <div class="filter-buttons">
-          <button class="btn-apply-filter" id="applyFilterBtn">✓ Aplicar</button>
-          <button class="btn-clear-filter" id="clearFilterBtn">✕ Limpar</button>
+          <button class="btn-apply-filter" id="applyFilterBtn">Aplicar Filtro</button>
+          <button class="btn-clear-filter" id="clearFilterBtn">Limpar Filtro</button>
         </div>
 
         <!-- Status dos Filtros -->
         <div class="filter-status" id="filterStatus">
           <div class="filter-status-item" id="filterStatusText"></div>
+        </div>
+
+        <!-- Informações de Resultados -->
+        <div class="filter-result-info" id="filterResultInfo">
+          <div class="filter-result-info-item" id="filterResultText"></div>
         </div>
       </div>
     </div>
@@ -309,6 +329,10 @@
   const state = {
     beraMap: null,
     loadedData: null,
+    allUUIDs: [],           // Todos os UUIDs carregados
+    visibleUUIDs: [],       // UUIDs visíveis atualmente (após filtro)
+    hiddenUUIDs: [],        // UUIDs ocultos (removidos do mapa)
+    featuresByUUID: {},     // Armazenar features originais por UUID para restauração
     filters: {
       responsavel: '',
       situacao: '',
@@ -317,6 +341,17 @@
     },
     filtroAtivo: false
   };
+
+  // ===================================================================
+  // INICIALIZAÇÃO DO MAPA
+  // ===================================================================
+
+  function initMap() {
+    state.beraMap = BeraMap.init('map', {
+      center: [-8.7619, -63.9039],
+      zoom: 13
+    });
+  }
 
   // ===================================================================
   // FILTROS
@@ -335,6 +370,7 @@
     if (temFiltro) {
       state.filtroAtivo = true;
       updateFilterStatus();
+      filterGeometries();
     } else {
       clearFilters();
     }
@@ -353,6 +389,78 @@
 
     state.filtroAtivo = false;
     document.getElementById('filterStatus').classList.remove('active');
+    document.getElementById('filterResultInfo').classList.remove('active');
+
+    // Restaurar todas as geometrias ocultas
+    restoreAllGeometries();
+  }
+
+  function restoreAllGeometries() {
+    // Restaurar geometrias que foram ocultas pelo filtro
+    if (state.hiddenUUIDs.length > 0) {
+      state.hiddenUUIDs.forEach(uuid => {
+        // Verificar se a feature está armazenada
+        if (state.featuresByUUID[uuid]) {
+          const feature = state.featuresByUUID[uuid];
+          // Re-adicionar a geometria com o UUID original
+          state.beraMap.addGeometries(feature, { uuid: uuid });
+        }
+      });
+      // Limpar array de ocultos e atualizar visíveis
+      state.hiddenUUIDs = [];
+      state.visibleUUIDs = [...state.allUUIDs];
+    }
+  }
+
+  function filterGeometries() {
+    // Etapa 1: Restaurar todas as geometrias ocultas antes de aplicar novo filtro
+    restoreAllGeometries();
+
+    state.visibleUUIDs = [];
+    const uuidsToRemove = [];
+
+    // Etapa 2: Iterar sobre todas as geometrias e verificar filtros
+    state.allUUIDs.forEach(uuid => {
+      const geometryData = state.beraMap.getGeometryByUUID(uuid);
+
+      if (geometryData) {
+        const props = geometryData.feature.properties || {};
+
+        // Verificar se passa nos filtros
+        let passaNosFilteros = true;
+
+        if (state.filters.responsavel && props.responsavel !== state.filters.responsavel) {
+          passaNosFilteros = false;
+        }
+
+        if (state.filters.situacao && props.situacao !== state.filters.situacao) {
+          passaNosFilteros = false;
+        }
+
+        if (state.filters.dataInicio && props.dataInicio && props.dataInicio < state.filters.dataInicio) {
+          passaNosFilteros = false;
+        }
+
+        if (state.filters.dataFim && props.dataFim && props.dataFim > state.filters.dataFim) {
+          passaNosFilteros = false;
+        }
+
+        if (passaNosFilteros) {
+          state.visibleUUIDs.push(uuid);
+        } else {
+          uuidsToRemove.push(uuid);
+        }
+      }
+    });
+
+    // Etapa 3: Remover geometrias que não passaram no filtro
+    if (uuidsToRemove.length > 0) {
+      state.beraMap.removeGeometries(uuidsToRemove);
+      state.hiddenUUIDs = uuidsToRemove;
+    }
+
+    // Etapa 4: Atualizar informações de resultado
+    updateResultInfo();
   }
 
   function updateFilterStatus() {
@@ -378,15 +486,19 @@
     statusEl.classList.add('active');
   }
 
-  // ===================================================================
-  // INICIALIZAÇÃO DO MAPA
-  // ===================================================================
+  function updateResultInfo() {
+    const resultEl = document.getElementById('filterResultInfo');
+    const resultTextEl = document.getElementById('filterResultText');
 
-  function initMap() {
-    state.beraMap = BeraMap.init('map', {
-      center: [-8.7619, -63.9039],
-      zoom: 13
-    });
+    const totalGeometrias = state.allUUIDs.length;
+    const geometriasVisiveis = state.visibleUUIDs.length;
+    const geometriasOcultas = state.hiddenUUIDs.length;
+
+    resultTextEl.innerHTML =
+      '📊 Resultado: <strong>' + geometriasVisiveis + '</strong> de <strong>' + totalGeometrias +
+      '</strong> geometrias (' + geometriasOcultas + ' ocultas)';
+
+    resultEl.classList.add('active');
   }
 
   // ===================================================================
@@ -408,11 +520,22 @@
           }
 
           const uuids = state.beraMap.addGeometries(geojson);
+
+          // Armazenar features originais por UUID para restauração posterior
+          uuids.forEach((uuid, index) => {
+            if (geojson.features[index]) {
+              state.featuresByUUID[uuid] = geojson.features[index];
+            }
+          });
+
           state.loadedData = {
             uuids: uuids,
             data: geojson,
             loadedAt: new Date()
           };
+
+          state.allUUIDs = uuids;
+          state.visibleUUIDs = uuids;
 
           // Ocultar mensagem de carregamento
           document.getElementById('loadingSection').style.display = 'none';

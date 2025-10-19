@@ -120,7 +120,7 @@ export class BeraMap {
       const addedUUIDs = [];
       
       features.forEach(feature => {
-        const uuid = this._geoManager.addGeometry(feature);
+        const uuid = this._geoManager.addGeometry(feature, options);
         const geometryType = feature.geometry.type;
         
         if (this._renderers[geometryType]) {
