@@ -50,6 +50,9 @@
           padding: 20px;
           border-bottom: 2px solid #3388ff;
           background: #fafafa;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
       }
 
       .sidebar-header h1 {
@@ -59,6 +62,17 @@
           display: flex;
           align-items: center;
           gap: 10px;
+      }
+
+      .close-sidebar-btn {
+          display: none;
+          background: none;
+          border: none;
+          font-size: 28px;
+          cursor: pointer;
+          color: #333;
+          padding: 0;
+          line-height: 1;
       }
 
       .sidebar-content {
@@ -233,15 +247,155 @@
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
       }
+
+      /* ===================================================================
+         RESPONSIVIDADE - MOBILE
+         =================================================================== */
+
+      .hamburger-btn {
+          display: none;
+      }
+
+      .sidebar-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 998;
+      }
+
+      .sidebar-overlay.active {
+          display: block;
+      }
+
+      @media (max-width: 768px) {
+          .container {
+              flex-direction: column;
+              padding: 0;
+              gap: 0;
+          }
+
+          #map {
+              flex: 1;
+              border-radius: 0;
+              height: 100%;
+          }
+
+          .sidebar {
+              position: fixed;
+              top: 0;
+              right: -100%;
+              height: 100vh;
+              width: 100%;
+              max-width: 380px;
+              border-radius: 0;
+              z-index: 1000;
+              transition: right 0.3s ease;
+              box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+          }
+
+          .sidebar.active {
+              right: 0;
+          }
+
+          .sidebar-header {
+              padding: 16px;
+          }
+
+          .sidebar-header h1 {
+              font-size: 18px;
+          }
+
+          .close-sidebar-btn {
+              display: block;
+          }
+
+          .sidebar-content {
+              padding: 16px;
+          }
+
+          .hamburger-btn {
+              display: flex;
+              position: fixed;
+              bottom: 20px;
+              right: 20px;
+              z-index: 999;
+              width: 56px;
+              height: 56px;
+              background: #3388ff;
+              border: none;
+              border-radius: 50%;
+              cursor: pointer;
+              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+              color: white;
+              font-size: 24px;
+              align-items: center;
+              justify-content: center;
+              transition: all 0.3s ease;
+          }
+
+          .hamburger-btn:hover {
+              background: #2268cc;
+              transform: scale(1.1);
+          }
+
+          .filter-buttons button {
+              font-size: 11px;
+              padding: 8px;
+          }
+
+          .filter-group input,
+          .filter-group select {
+              font-size: 14px;
+          }
+
+          .section-title {
+              font-size: 12px;
+          }
+
+          .filter-group label {
+              font-size: 11px;
+          }
+      }
+
+      @media (max-width: 480px) {
+          .sidebar {
+              max-width: 100%;
+          }
+
+          .sidebar-header h1 {
+              font-size: 16px;
+          }
+
+          .hamburger-btn {
+              width: 50px;
+              height: 50px;
+              font-size: 20px;
+              bottom: 15px;
+              right: 15px;
+          }
+
+          .loading-message {
+              padding: 15px;
+              font-size: 11px;
+          }
+      }
   </style>
 </head>
 <body>
 <div class="container">
   <div id="map"></div>
 
-  <div class="sidebar">
+  <!-- Overlay para fechar sidebar ao clicar fora -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <h1>📍 BeraMap</h1>
+      <button class="close-sidebar-btn" id="closeSidebarBtn">✕</button>
     </div>
 
     <div class="sidebar-content">
@@ -282,28 +436,28 @@
           </select>
         </div>
 
-        <!-- Filtro: Período em Data -->
+        <!-- Filtro: Data -->
         <div class="filter-group">
-          <label>Período</label>
+          <label>Data</label>
           <div class="filter-date-range">
-            <input type="date" id="filterDataInicio" placeholder="Data início">
-            <span class="separator">até</span>
-            <input type="date" id="filterDataFim" placeholder="Data fim">
+            <input type="date" id="filterDataInicio" placeholder="Início">
+            <span class="separator">—</span>
+            <input type="date" id="filterDataFim" placeholder="Fim">
           </div>
         </div>
 
-        <!-- Botões de Ação -->
+        <!-- Botões de ação -->
         <div class="filter-buttons">
-          <button class="btn-apply-filter" id="applyFilterBtn">Aplicar Filtro</button>
-          <button class="btn-clear-filter" id="clearFilterBtn">Limpar Filtro</button>
+          <button id="applyFilterBtn" class="btn-apply-filter">Aplicar</button>
+          <button id="clearFilterBtn" class="btn-clear-filter">Limpar</button>
         </div>
 
-        <!-- Status dos Filtros -->
+        <!-- Status do filtro -->
         <div class="filter-status" id="filterStatus">
           <div class="filter-status-item" id="filterStatusText"></div>
         </div>
 
-        <!-- Informações de Resultados -->
+        <!-- Informações de resultado -->
         <div class="filter-result-info" id="filterResultInfo">
           <div class="filter-result-info-item" id="filterResultText"></div>
         </div>
@@ -311,6 +465,9 @@
     </div>
   </div>
 </div>
+
+<!-- Botão hamburger flutuante -->
+<button class="hamburger-btn" id="hamburgerBtn">☰</button>
 
 <!-- Leaflet -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -341,6 +498,25 @@
     },
     filtroAtivo: false
   };
+
+  // ===================================================================
+  // CONTROLE DO MENU RESPONSIVO
+  // ===================================================================
+
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('active');
+    document.getElementById('sidebarOverlay').classList.add('active');
+  }
+
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+  }
+
+  // Listeners para menu responsivo
+  document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
+  document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar);
+  document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
 
   // ===================================================================
   // INICIALIZAÇÃO DO MAPA
@@ -374,6 +550,9 @@
     } else {
       clearFilters();
     }
+
+    // Fechar sidebar no mobile após aplicar filtro
+    closeSidebar();
   }
 
   function clearFilters() {
@@ -515,7 +694,6 @@
           return response.json();
         })
         .then(function(geojson) {
-          console.log(geojson)
           if (!geojson.features || !Array.isArray(geojson.features)) {
             throw new Error('GeoJSON inválido');
           }
