@@ -1,0 +1,11 @@
+services:
+  app:
+    image: lucasramos/laravel-php8.3:1.0.0
+    container_name: bera
+    network_mode: "bridge"
+    volumes:
+      - .:/var/www/html/public
+    ports:
+      - "80:80"
+    environment:
+      - NODE_PATH=/usr/bin/node
