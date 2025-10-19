@@ -73,7 +73,7 @@ public class AcoesController : ControllerBase
                 ON 
                     a.id < b.id
                 WHERE 
-                    ST_DWithin(a.geom, b.geom, 0.001) OR
+                    ST_DWithin(a.geom, b.geom, 0.002) OR
 ST_Crosses(a.geom, b.geom)
     OR (ST_DWithin(a.geom, b.geom, 0.0005) AND NOT ST_Intersects(a.geom, b.geom));;
             ";
@@ -93,7 +93,7 @@ ST_Crosses(a.geom, b.geom)
                         situacao = "Concluído",
                         dataInicio = "2025-10-19",
                         dataFim = "2025-10-21",
-                        radius = 50
+                        radius = 100
                     },
                     geometry = new
                     {

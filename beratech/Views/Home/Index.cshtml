@@ -520,7 +520,7 @@
 
         function loadData() {
           try {
-            fetch('https://localhost:7297/api/acoes/filter') 
+            fetch('/api/acoes/filter') 
             // fetch('/data/dados.geojson')
               .then(function(response) {
                 if (!response.ok) {

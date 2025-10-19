@@ -7,15 +7,15 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["beratech/beratech.csproj", "beratech/"]
-RUN dotnet restore "beratech/beratech.csproj"
+COPY ["beratech.csproj", "."]
+RUN dotnet restore "/src/beratech.csproj"
 COPY . .
-WORKDIR "/src/beratech"
+WORKDIR "/src"
 RUN dotnet build "./beratech.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./beratech.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "/src/beratech.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
