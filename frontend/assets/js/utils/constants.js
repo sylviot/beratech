@@ -62,10 +62,10 @@ export const STYLE_PRESETS = {
     fillOpacity: 0.2
   },
   CIRCLE: {
-    color: '#ff7800',
+    color: '#ff0000',
     weight: 2,
     opacity: 0.8,
-    fillColor: '#ff7800',
+    fillColor: '#ff0000',
     fillOpacity: 0.2
   },
   DRAWING: {

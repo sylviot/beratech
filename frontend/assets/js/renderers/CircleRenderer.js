@@ -11,10 +11,10 @@ export class CircleRenderer extends BaseRenderer {
     super(beraMap, 'Circle', {
       ...options,
       defaultStyle: {
-        color: options.defaultColor || '#ff7800',
+        color: options.defaultColor || '#ff0000',
         weight: options.defaultWeight || 2,
         opacity: options.defaultOpacity || 0.8,
-        fillColor: options.defaultFillColor || '#ff7800',
+        fillColor: options.defaultFillColor || '#ff0000',
         fillOpacity: options.defaultFillOpacity || 0.2
       }
     });
